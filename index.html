@@ -19,6 +19,7 @@
 
     <script src="./hlp/angularjs-dropdown-multiselect.min.js"></script>
     <script src="./hlp/csvtojson.min.js"></script>
+    <script src="./hlp/luxon.min.js"></script>
     <script src="./app.js"></script>
 
     <style>
@@ -66,7 +67,7 @@
             </div>
           </div>
 
-          <div class="col-md-7 animate-show-hide ng-show" ng-show="mfbList.loadComplete">
+          <div class="col-md-8 animate-show-hide ng-show" ng-show="mfbList.loadComplete">
               <table class="table table-borderless">
                   <tr>
                       <td>
@@ -80,6 +81,9 @@
                             <i class="fas fa-search"></i>
                             Züge für Vorgang suchen
                          </button>  
+                      </td>
+                      <td>
+                                                 
                       </td>
                   </tr>
                   <tr class="animate-show-hide ng-show" ng-show="mfbList.selTrain">
@@ -111,7 +115,7 @@
                         <table class="table table-sm ">
                             <tr ng-repeat="v in a.vt">
                                 <td class="table-secondary">
-                                  {{v.day}} 
+                                  {{v.day.VText}} 
                                   <p> 
                                     <span class="animate-show-hide ng-show text-danger" ng-hide="v.trains.length<2">{{v.trains.length}} Regelungen</span>
                                     <span class="animate-show-hide ng-show" ng-show="v.trains.length<2">{{v.trains.length}} Regelung</span>

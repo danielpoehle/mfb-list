@@ -28,7 +28,7 @@
 
         mfbList.filterAndShowTrains = function(){
             mfbList.showTable = false;
-            mfbList.selTrain = false
+            mfbList.selTrain = false;
             mfbList.selectZNr = [];
             mfbList.FilteredTrains = mfbList.Trains.filter((t) => t.Vorgangsnummer === mfbList.BOB);
             let tNr = mfbList.FilteredTrains.map((t) => t.Zugnummer);
@@ -40,17 +40,25 @@
             }        
         };
 
+        mfbList.filterAndShowBOB = function(){
+            mfbList.showTable = false;
+            mfbList.selTrain = false;
+            mfbList.selectZNr = [];
+            mfbList.FilteredTrains = mfbList.Trains.filter((t) => t.Vorgangsnummer === mfbList.BOB);
+            console.log(mfbList.FilteredTrains[0]);
+        };
+
         mfbList.filterAndShowRules = function(){   
             mfbList.showTable = false;         
             mfbList.ArrangedTrains = [];
             for (let i = 0; i < mfbList.selectZNr.length; i+= 1) {                
-                let vt = mfbList.FilteredTrains.filter((t) => t.Zugnummer === mfbList.selectZNr[i]).map((z) => z.Verkehrstag);
+                let vt = mfbList.FilteredTrains.filter((t) => t.Zugnummer === mfbList.selectZNr[i]).map((z) => z.Verkehrstag.VNumber);
                 vt = vt.filter((item, index) => vt.indexOf(item)===index).sort();
                 let d = [];
                 for (let j = 0; j < vt.length; j+= 1) {                    
                     d.push({ 
-                        'day': vt[j],
-                        'trains': mfbList.Trains.filter((z) => z.Zugnummer === mfbList.selectZNr[i] && z.Verkehrstag === vt[j])
+                        'day': mfbList.Trains.find((z) => z.Verkehrstag.VNumber === vt[j]).Verkehrstag,
+                        'trains': mfbList.Trains.filter((z) => z.Zugnummer === mfbList.selectZNr[i] && z.Verkehrstag.VNumber === vt[j]).sort((a,b) => (a.Regelungsart > b.Regelungsart) ? 1 : -1)
                     });
                 }
                 mfbList.ArrangedTrains.push({
@@ -87,10 +95,14 @@
                 })
                 .fromString(event.target.result)
                 .then(function(result){
+                    for (let i = 0; i < result.length; i+= 1) {
+                        const vt = result[i].Verkehrstag; 
+                        result[i].Verkehrstag = {VText: vt, VNumber: luxon.DateTime.fromFormat(vt, 'dd.MM.yyyy').ts};                                               
+                    }
                     mfbList.Trains = result;
                     mfbList.loadComplete = true;
                     console.log(mfbList.Trains.length);
-                    //console.log(mfbList.Trains[0]);
+                    console.log(mfbList.Trains[0]);
                 })                
                 
             };
