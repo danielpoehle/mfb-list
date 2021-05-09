@@ -25,6 +25,7 @@
     <style>
       .ww {min-width: 700px;}
       .wm {min-width: 400px;}
+      .ws {min-width: 400px; max-width: 500px; }
     </style>
 
     
@@ -77,13 +78,20 @@
                           </div>                        
                       </td>
                       <td>
-                         <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowTrains();">
+                        <div class="d-grid gap-2">
+                          <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowTrains();">
                             <i class="fas fa-search"></i>
                             Züge für Vorgang suchen
                          </button>  
+                        </div>                         
                       </td>
                       <td>
-                                                 
+                        <div class="d-grid gap-2">  
+                          <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowBOB();">
+                            <i class="fas fa-ellipsis-h"></i>
+                            Parallele Vorgänge zeigen
+                         </button>                           
+                        </div>                                           
                       </td>
                   </tr>
                   <tr class="animate-show-hide ng-show" ng-show="mfbList.selTrain">
@@ -91,13 +99,54 @@
                         <div ng-dropdown-multiselect="" class="btn btn-outline-light" options="mfbList.ZNr" selected-model="mfbList.selectZNr" extra-settings="mfbList.Options" translation-texts="mfbList.Button"></div>
                       </td>
                       <td>
-                        <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowRules();">
+                        <div class="d-grid gap-2">
+                          <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowRules();">
                             <i class="fas fa-align-left"></i>
                             Regelungen für Züge suchen
-                         </button>  
+                         </button> 
+                        </div>                         
                       </td>
                   </tr>
               </table>
+          </div>
+
+          <div class="col-md-12 animate-show-hide ng-show" ng-show="mfbList.showBOB">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <td>Vorgangsnummer</td>
+                  <td>Datum</td>
+                  <td>Züge mit Mehrfachbetroffenheit</td>
+                  <td>Parallele Vorgänge</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="a in mfbList.ArrangedBOB">
+                  <td class="table-primary">{{a.Bob}}</td>
+                  <td>{{a.VT.VText}}</td>
+                  <td class="ws">
+                    <div>Anzahl: {{a.MfbTrains.Anz}} <i class="fas fa-train"></i></div>
+                    <div><i class="fas fa-info-circle"></i> Zugnummern: {{a.MfbTrains.Trains}}</div>
+                  </td>                    
+                  <td class="ws">
+                    <div class="accordion" id="accordionExample{{a.VT.VText}}">
+                      <div class="accordion-item" ng-repeat="p in a.Parallel">
+                        <h2 class="accordion-header" id="{{p.bobnr}}{{a.VT.VText}}">
+                          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#id{{p.bobnr}}" aria-expanded="true" aria-controls="id{{p.bobnr}}">
+                            Vorgangsnummer {{p.bobnr}}
+                          </button>
+                        </h2>
+                        <div id="id{{p.bobnr}}" class="accordion-collapse collapse show" aria-labelledby="{{p.bobnr}}{{a.VT.VText}}" data-bs-parent="#accordionExample{{a.VT.VText}}">
+                          <div class="accordion-body">
+                            <i class="fas fa-info-circle"></i> Zugnummern: {{p.trains}}
+                          </div>
+                        </div>
+                      </div>
+                    </div>  
+                  </td>
+                </tr>
+              </tbody>              
+            </table>              
           </div>
 
           <div class="col-md-12 animate-show-hide ng-show" ng-show="mfbList.showTable">

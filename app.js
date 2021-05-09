@@ -13,6 +13,7 @@
         mfbList.loadComplete = false;
         mfbList.selTrain = false;
         mfbList.showTable = false;
+        mfbList.showBOB = false;
         mfbList.Trains = [];
         mfbList.ZNr = [];
         mfbList.selectZNr = [];
@@ -20,6 +21,7 @@
         mfbList.FilteredTrains = [];
         mfbList.BOBmfb = [];
         mfbList.ArrangedTrains = [];
+        mfbList.ArrangedBOB = [];
 
         mfbList.Options = { scrollableHeight: '300px', scrollable: true, enableSearch: true, 
         checkBoxes: true, styleActive: true, template: '{{option}}', smartButtonMaxItems: 1, smartButtonTextConverter: function(itemText, originalItem) {return 'Zugnummern auswählen'} };
@@ -28,6 +30,7 @@
 
         mfbList.filterAndShowTrains = function(){
             mfbList.showTable = false;
+            mfbList.showBOB = false;
             mfbList.selTrain = false;
             mfbList.selectZNr = [];
             mfbList.FilteredTrains = mfbList.Trains.filter((t) => t.Vorgangsnummer === mfbList.BOB);
@@ -43,9 +46,42 @@
         mfbList.filterAndShowBOB = function(){
             mfbList.showTable = false;
             mfbList.selTrain = false;
-            mfbList.selectZNr = [];
+            mfbList.showBOB = false;
+            mfbList.ArrangedBOB = [];
             mfbList.FilteredTrains = mfbList.Trains.filter((t) => t.Vorgangsnummer === mfbList.BOB);
-            console.log(mfbList.FilteredTrains[0]);
+            let vt = mfbList.FilteredTrains.map((z) => z.Verkehrstag.VNumber);
+            vt = vt.filter((item, index) => vt.indexOf(item)===index).sort();
+            for (let k = 0; k < vt.length; k+= 1) {
+                let znr = mfbList.FilteredTrains.filter((z) => z.Verkehrstag.VNumber === vt[k]).map((z) => z.Zugnummer);
+                znr = znr.filter((item, index) => znr.indexOf(item)===index).sort();
+                let mfbznr = [];
+                let bob = mfbList.Trains.filter((t) => t.Verkehrstag.VNumber === vt[k] && znr.includes(t.Zugnummer)).map((z) => z.Vorgangsnummer);
+                bob = bob.filter((item, index) => bob.indexOf(item)===index).sort();
+                let boblist = [];
+                for (let j = 0; j < bob.length; j+= 1) {
+                    if(bob[j] !== mfbList.BOB){
+                        let znrbob = mfbList.Trains.filter((t) => t.Verkehrstag.VNumber === vt[k] && znr.includes(t.Zugnummer) && t.Vorgangsnummer === bob[j]).map((z) => z.Zugnummer);
+                        znrbob = znrbob.filter((item, index) => znrbob.indexOf(item)===index).sort((a, b) => a - b);
+                        mfbznr = mfbznr.concat(znrbob);
+                        boblist.push({
+                            'bobnr': bob[j],
+                            'trains': znrbob.join(', ')
+                        });
+                    }                    
+                }                
+                mfbznr = mfbznr.filter((item, index) => mfbznr.indexOf(item)===index).sort((a, b) => a - b);                
+                mfbList.ArrangedBOB.push({
+                    'Bob': mfbList.BOB, 
+                    'VT': mfbList.FilteredTrains.find((z) => z.Verkehrstag.VNumber === vt[k]).Verkehrstag,
+                    'Parallel': boblist,
+                    'MfbTrains': {'Anz': mfbznr.length, 'Trains': mfbznr.join(', ')},
+                });
+            }
+            if(mfbList.ArrangedBOB.length >0){
+                mfbList.showBOB = true;
+            }else{
+                mfbList.showBOB = false;
+            } 
         };
 
         mfbList.filterAndShowRules = function(){   
@@ -97,12 +133,12 @@
                 .then(function(result){
                     for (let i = 0; i < result.length; i+= 1) {
                         const vt = result[i].Verkehrstag; 
-                        result[i].Verkehrstag = {VText: vt, VNumber: luxon.DateTime.fromFormat(vt, 'dd.MM.yyyy').ts};                                               
+                        result[i].Verkehrstag = {'VText': vt, 'VNumber': luxon.DateTime.fromFormat(vt, 'dd.MM.yyyy').ts};                                               
                     }
                     mfbList.Trains = result;
                     mfbList.loadComplete = true;
                     console.log(mfbList.Trains.length);
-                    console.log(mfbList.Trains[0]);
+                    //console.log(mfbList.Trains[0]);
                 })                
                 
             };
