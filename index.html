@@ -24,8 +24,10 @@
 
     <style>
       .ww {min-width: 700px;}
+      .wv {min-width: 750px; max-width: 800px;}
       .wm {min-width: 400px;}
-      .ws {min-width: 400px; max-width: 500px; }
+      .wf {min-width: 300px; max-width: 350px;}
+      .ws {min-width: 400px; max-width: 700px; }
     </style>
 
     
@@ -68,137 +70,182 @@
             </div>
           </div>
 
-          <div class="col-md-8 animate-show-hide ng-show" ng-show="mfbList.loadComplete">
-              <table class="table table-borderless">
-                  <tr>
-                      <td>
-                          <div class="input-group mb-3">
-                            <span class="input-group-text" id="basic-addon3">BOB-Vorgangsnummer</span>
-                            <input type="text" class="form-control form-control-lg" id="bob" aria-describedby="basic-addon3" placeholder="Vorgangsnummer" ng-model="mfbList.BOB">
-                          </div>                        
-                      </td>
-                      <td>
-                        <div class="d-grid gap-2">
-                          <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowTrains();">
-                            <i class="fas fa-search"></i>
-                            Züge für Vorgang suchen
-                         </button>  
-                        </div>                         
-                      </td>
-                      <td>
-                        <div class="d-grid gap-2">  
-                          <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowBOB();">
-                            <i class="fas fa-ellipsis-h"></i>
-                            Parallele Vorgänge zeigen
-                         </button>                           
-                        </div>                                           
-                      </td>
-                  </tr>
-                  <tr class="animate-show-hide ng-show" ng-show="mfbList.selTrain">
-                      <td>                          
-                        <div ng-dropdown-multiselect="" class="btn btn-outline-light" options="mfbList.ZNr" selected-model="mfbList.selectZNr" extra-settings="mfbList.Options" translation-texts="mfbList.Button"></div>
-                      </td>
-                      <td>
-                        <div class="d-grid gap-2">
-                          <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowRules();">
-                            <i class="fas fa-align-left"></i>
-                            Regelungen für Züge suchen
-                         </button> 
-                        </div>                         
-                      </td>
-                  </tr>
-              </table>
-          </div>
-
-          <div class="col-md-12 animate-show-hide ng-show" ng-show="mfbList.showBOB">
-            <table class="table table-sm table-hover">
-              <thead>
-                <tr>
-                  <td>Vorgangsnummer</td>
-                  <td>Datum</td>
-                  <td>Züge mit Mehrfachbetroffenheit</td>
-                  <td>Parallele Vorgänge</td>
-                </tr>
-              </thead>
-              <tbody>
-                <tr ng-repeat="a in mfbList.ArrangedBOB">
-                  <td class="table-primary">{{a.Bob}}</td>
-                  <td>{{a.VT.VText}}</td>
-                  <td class="ws">
-                    <div>Anzahl: {{a.MfbTrains.Anz}} <i class="fas fa-train"></i></div>
-                    <div><i class="fas fa-info-circle"></i> Zugnummern: {{a.MfbTrains.Trains}}</div>
-                  </td>                    
-                  <td class="ws">
-                    <div class="accordion" id="accordionExample{{a.VT.VText}}">
-                      <div class="accordion-item" ng-repeat="p in a.Parallel">
-                        <h2 class="accordion-header" id="{{p.bobnr}}{{a.VT.VText}}">
-                          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#id{{p.bobnr}}" aria-expanded="true" aria-controls="id{{p.bobnr}}">
-                            Vorgangsnummer {{p.bobnr}}
-                          </button>
-                        </h2>
-                        <div id="id{{p.bobnr}}" class="accordion-collapse collapse show" aria-labelledby="{{p.bobnr}}{{a.VT.VText}}" data-bs-parent="#accordionExample{{a.VT.VText}}">
-                          <div class="accordion-body">
-                            <i class="fas fa-info-circle"></i> Zugnummern: {{p.trains}}
+          <div class="animate-show-hide ng-show" ng-show="mfbList.loadComplete">
+            <nav>
+              <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <button class="nav-link active text-danger" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Vorgänge mit MFB</button>
+                <button class="nav-link text-danger" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Züge mit MFB</button>
+              </div>
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+              <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                <div class="col-md-8 animate-show-hide ng-show" ng-show="mfbList.loadComplete">
+                  <table class="table table-borderless">
+                      <tr>
+                          <td>
+                              <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon3">BOB-Vorgangsnummer</span>
+                                <input type="text" class="form-control form-control-lg" id="bob" aria-describedby="basic-addon3" placeholder="Vorgangsnummer" ng-model="mfbList.BOB">
+                              </div>                        
+                          </td>
+                          <td>
+                            <div class="d-grid gap-2">
+                              <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowTrains();">
+                                <i class="fas fa-search"></i>
+                                Züge für Vorgang suchen
+                             </button>  
+                            </div>                         
+                          </td>
+                          <td>
+                            <div class="d-grid gap-2">  
+                              <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowBOB();">
+                                <i class="fas fa-ellipsis-h"></i>
+                                Parallele Vorgänge zeigen
+                             </button>                           
+                            </div>                                           
+                          </td>
+                      </tr>
+                      <tr class="animate-show-hide ng-show" ng-show="mfbList.selTrain">
+                          <td>                          
+                            <div ng-dropdown-multiselect="" class="btn btn-outline-light" options="mfbList.ZNr" selected-model="mfbList.selectZNr" extra-settings="mfbList.Options" translation-texts="mfbList.Button"></div>
+                          </td>
+                          <td>
+                            <div class="d-grid gap-2">
+                              <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.filterAndShowRules();">
+                                <i class="fas fa-align-left"></i>
+                                Regelungen für Züge suchen
+                             </button> 
+                            </div>                         
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+    
+              <div class="col-md-12 animate-show-hide ng-show" ng-show="mfbList.showBOB">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <td>Vorgangsnummer</td>
+                      <td>Datum</td>
+                      <td>Züge mit Mehrfachbetroffenheit</td>
+                      <td>Parallele Vorgänge</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="a in mfbList.ArrangedBOB">
+                      <td class="table-primary">{{a.Bob}}</td>
+                      <td>{{a.VT.VText}}</td>
+                      <td class="wf">
+                        <div>Anzahl: {{a.MfbTrains.Anz}} <i class="fas fa-train"></i></div>
+                        <div class="animate-show-hide ng-show" ng-hide="a.MfbTrains.Anz===0"><i class="fas fa-info-circle"></i> Zugnummern: {{a.MfbTrains.Trains}}</div>
+                      </td>                    
+                      <td class="wf">
+                        <div class="accordion" id="accordionExample{{a.VT.VText}}">
+                          <div class="accordion-item" ng-repeat="p in a.Parallel">
+                            <h2 class="accordion-header" id="{{p.bobnr}}{{a.VT.VText}}">
+                              <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#id{{p.bobnr}}" aria-expanded="true" aria-controls="id{{p.bobnr}}">
+                                Vorgangsnummer {{p.bobnr}}
+                              </button>
+                            </h2>
+                            <div id="id{{p.bobnr}}" class="accordion-collapse collapse show" aria-labelledby="{{p.bobnr}}{{a.VT.VText}}" data-bs-parent="#accordionExample{{a.VT.VText}}">
+                              <div class="accordion-body">
+                                <i class="fas fa-info-circle"></i> Zugnummern: {{p.trains}}
+                                <table class="table table-sm table-hover">
+                                  <thead class="table-light">
+                                    <tr>
+                                      <td>Zugnummer</td>
+                                      <td class="text-center">Vorgang</td>
+                                      <td class="text-center">Regelungsart</td>
+                                      <td class="text-center">Details</td>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr ng-repeat="r in p.regel">
+                                      <td>{{r.Zugnummer}}</td>
+                                      <td class="text-center">{{r.Vorgangsnummer}}</td>
+                                      <td class="text-center">
+                                        <i class="fas fa-times animate-show-hide ng-show" ng-show="r.Regelungsart==='Ausfall'"></i>
+                                        <i class="fas fa-directions animate-show-hide ng-show" ng-show="r.Regelungsart==='Umleitung'"></i>
+                                        <i class="fas fa-calendar-minus animate-show-hide ng-show" ng-show="r.Regelungsart==='Haltausfall'"></i>
+                                        <i class="fas fa-hourglass-half animate-show-hide ng-show" ng-show="r.Regelungsart==='Verspätung'"></i>
+                                        <i class="fas fa-history animate-show-hide ng-show" ng-show="r.Regelungsart==='Vorplan'"></i>
+                                        {{r.Regelungsart}}
+                                      </td>
+                                      <td class="text-center" >
+                                        <span title="{{r['Vorplanab BS']}} {{r.Ausfallab}} {{r.Ausfallbis}} {{r.Umleitungsstrecke}}, {{r['Verspätung']}} min, {{r.Bemerkung}} "><i class="fas fa-asterisk"></i></span>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </div>  
-                  </td>
-                </tr>
-              </tbody>              
-            </table>              
+                        </div>  
+                      </td>
+                    </tr>
+                  </tbody>              
+                </table>              
+              </div>
+    
+              <div class="col-md-12 animate-show-hide ng-show" ng-show="mfbList.showTable">
+                  <table class="table table-sm">
+                      <tr ng-repeat="a in mfbList.ArrangedTrains">
+                          <td class="table-primary"> 
+                            <b>Zugnummer <p>{{a.znr}}</p></b> 
+                            <p>Kunde {{a.kd}}</p>
+                            <p>{{a.zg}}</p>
+                            <p>
+                              {{a.von}} - {{a.bis}}
+                            </p>
+                          </td>
+                          <td>
+                            <table class="table table-sm ">
+                                <tr ng-repeat="v in a.vt">
+                                    <td class="table-secondary">
+                                      {{v.day.VText}} 
+                                      <p> 
+                                        <span class="animate-show-hide ng-show text-danger" ng-hide="v.trains.length<2">{{v.trains.length}} Regelungen</span>
+                                        <span class="animate-show-hide ng-show" ng-show="v.trains.length<2">{{v.trains.length}} Regelung</span>
+                                      </p>
+                                    </td>
+                                    <td>
+                                        <table class="table table-hover table-sm table-borderless ">
+                                            <tr ng-repeat="t in v.trains">
+                                                <td>BOB-Nr. {{t.Vorgangsnummer}}</td>
+                                                <td>
+                                                  <i class="fas fa-times animate-show-hide ng-show" ng-show="t.Regelungsart==='Ausfall'"></i>
+                                                  <i class="fas fa-directions animate-show-hide ng-show" ng-show="t.Regelungsart==='Umleitung'"></i>
+                                                  <i class="fas fa-calendar-minus animate-show-hide ng-show" ng-show="t.Regelungsart==='Haltausfall'"></i>
+                                                  <i class="fas fa-hourglass-half animate-show-hide ng-show" ng-show="t.Regelungsart==='Verspätung'"></i>
+                                                  <i class="fas fa-history animate-show-hide ng-show" ng-show="t.Regelungsart==='Vorplan'"></i>
+                                                  {{t.Regelungsart}}
+                                                </td>
+                                                <td class="ww"> 
+                                                  <span class="animate-show-hide ng-show" ng-hide="t['Vorplanab BS']===''">ab {{t['Vorplanab BS']}} </span>                                             
+                                                  <span class="animate-show-hide ng-show" ng-hide="t.Ausfallab===''">von {{t.Ausfallab}} </span>
+                                                  <span class="animate-show-hide ng-show" ng-hide="t.Ausfallbis===''">bis {{t.Ausfallbis}}</span>                                              
+                                                  <span class="animate-show-hide ng-show" ng-hide="t.Umleitungsstrecke===''">{{t.Umleitungsstrecke}} +</span>
+                                                  <span class="animate-show-hide ng-show" ng-hide="t['Verspätung']===''">{{t['Verspätung']}} min</span>
+                                                </td>
+                                                <td class="wm">{{t.Bemerkung}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>                            
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+              </div>
+              <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                Profile Tab
+              </div>
+            </div>
           </div>
+          
 
-          <div class="col-md-12 animate-show-hide ng-show" ng-show="mfbList.showTable">
-              <table class="table table-sm">
-                  <tr ng-repeat="a in mfbList.ArrangedTrains">
-                      <td class="table-primary"> 
-                        <b>Zugnummer <p>{{a.znr}}</p></b> 
-                        <p>Kunde {{a.kd}}</p>
-                        <p>{{a.zg}}</p>
-                        <p>
-                          {{a.von}} - {{a.bis}}
-                        </p>
-                      </td>
-                      <td>
-                        <table class="table table-sm ">
-                            <tr ng-repeat="v in a.vt">
-                                <td class="table-secondary">
-                                  {{v.day.VText}} 
-                                  <p> 
-                                    <span class="animate-show-hide ng-show text-danger" ng-hide="v.trains.length<2">{{v.trains.length}} Regelungen</span>
-                                    <span class="animate-show-hide ng-show" ng-show="v.trains.length<2">{{v.trains.length}} Regelung</span>
-                                  </p>
-                                </td>
-                                <td>
-                                    <table class="table table-hover table-sm table-borderless ">
-                                        <tr ng-repeat="t in v.trains">
-                                            <td>BOB-Nr. {{t.Vorgangsnummer}}</td>
-                                            <td>
-                                              <i class="fas fa-times animate-show-hide ng-show" ng-show="t.Regelungsart==='Ausfall'"></i>
-                                              <i class="fas fa-directions animate-show-hide ng-show" ng-show="t.Regelungsart==='Umleitung'"></i>
-                                              <i class="fas fa-calendar-minus animate-show-hide ng-show" ng-show="t.Regelungsart==='Haltausfall'"></i>
-                                              <i class="fas fa-hourglass-half animate-show-hide ng-show" ng-show="t.Regelungsart==='Verspätung'"></i>
-                                              <i class="fas fa-history animate-show-hide ng-show" ng-show="t.Regelungsart==='Vorplan'"></i>
-                                              {{t.Regelungsart}}
-                                            </td>
-                                            <td class="ww"> 
-                                              <span class="animate-show-hide ng-show" ng-hide="t['Vorplanab BS']===''">ab {{t['Vorplanab BS']}} </span>                                             
-                                              <span class="animate-show-hide ng-show" ng-hide="t.Ausfallab===''">von {{t.Ausfallab}} </span>
-                                              <span class="animate-show-hide ng-show" ng-hide="t.Ausfallbis===''">bis {{t.Ausfallbis}}</span>                                              
-                                              <span class="animate-show-hide ng-show" ng-hide="t.Umleitungsstrecke===''">{{t.Umleitungsstrecke}} +</span>
-                                              <span class="animate-show-hide ng-show" ng-hide="t['Verspätung']===''">{{t['Verspätung']}} min</span>
-                                            </td>
-                                            <td class="wm">{{t.Bemerkung}}</td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>                            
-                      </td>
-                  </tr>
-              </table>
-          </div>
+          
 
         </div>
         <div class="col-md-12">

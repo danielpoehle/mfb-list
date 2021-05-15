@@ -60,12 +60,14 @@
                 let boblist = [];
                 for (let j = 0; j < bob.length; j+= 1) {
                     if(bob[j] !== mfbList.BOB){
+                        let bobregel = mfbList.Trains.filter((t) => t.Verkehrstag.VNumber === vt[k] && znr.includes(t.Zugnummer) && t.Vorgangsnummer === bob[j]);
                         let znrbob = mfbList.Trains.filter((t) => t.Verkehrstag.VNumber === vt[k] && znr.includes(t.Zugnummer) && t.Vorgangsnummer === bob[j]).map((z) => z.Zugnummer);
                         znrbob = znrbob.filter((item, index) => znrbob.indexOf(item)===index).sort((a, b) => a - b);
                         mfbznr = mfbznr.concat(znrbob);
                         boblist.push({
                             'bobnr': bob[j],
-                            'trains': znrbob.join(', ')
+                            'trains': znrbob.join(', '),
+                            'regel': bobregel.sort((a,b) => (a.Zugnummer > b.Zugnummer) ? 1 : (a.Zugnummer === b.Zugnummer) ? ((a.Regelungsart > b.Regelungsart) ? 1 : -1) :-1 )
                         });
                     }                    
                 }                
