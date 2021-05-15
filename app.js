@@ -23,6 +23,13 @@
         mfbList.ArrangedTrains = [];
         mfbList.ArrangedBOB = [];
 
+        mfbList.inputZNr = '';
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        mfbList.fromDate = new Date().toLocaleDateString('de-DE', options);
+        mfbList.toDate = mfbList.fromDate;
+        mfbList.showRules = false;
+        mfbList.ArrangedRules = [];
+
         mfbList.Options = { scrollableHeight: '300px', scrollable: true, enableSearch: true, 
         checkBoxes: true, styleActive: true, template: '{{option}}', smartButtonMaxItems: 1, smartButtonTextConverter: function(itemText, originalItem) {return 'Zugnummern auswählen'} };
         mfbList.Button = {buttonDefaultText: 'Zugnummern auswählen'};
@@ -116,6 +123,28 @@
 
         };
 
+        mfbList.filterAndShowRulesForTrain = function(){
+            mfbList.showRules = false;
+            mfbList.ArrangedRules = [];
+            const DateTime = luxon.DateTime;
+            const Interval = luxon.Interval;
+            const intvl = Interval.fromDateTimes(DateTime.fromFormat(mfbList.fromDate, 'dd.MM.yyyy'), 
+                                                 DateTime.fromFormat(mfbList.toDate, 'dd.MM.yyyy').plus({ days: 1 }).minus({seconds: 1}));
+            let days = intvl.splitBy(luxon.Duration.fromObject({days: 1})).map((i) => i.start.toFormat('dd.MM.yyyy'));
+            for (let i = 0; i < days.length; i+= 1) {
+                let rules = mfbList.Trains.filter((t) => t.Zugnummer === mfbList.inputZNr && t.Verkehrstag.VNumber === DateTime.fromFormat(days[i], 'dd.MM.yyyy').ts);   
+                mfbList.ArrangedRules.push({
+                    'date': days[i],
+                    'rules': rules.sort((a,b) => (a.Regelungsart > b.Regelungsart) ? 1 : (a.Regelungsart === b.Regelungsart) ? ((a.Vorgangsnummer > b.Vorgangsnummer) ? 1 : -1) :-1 )
+                });            
+            }
+            if(mfbList.ArrangedRules.length >0){
+                mfbList.showRules = true;
+            }else{
+                mfbList.showRules = false;
+            }             
+        };
+
         $(document).ready(function () {
             $('#list').bind('change', handleDialog);
         });
@@ -140,7 +169,7 @@
                     mfbList.Trains = result;
                     mfbList.loadComplete = true;
                     console.log(mfbList.Trains.length);
-                    //console.log(mfbList.Trains[0]);
+                    console.log(mfbList.Trains[0]);
                 })                
                 
             };
