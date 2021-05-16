@@ -145,6 +145,14 @@
             }             
         };
 
+        mfbList.filterTrain = function(znr, vt){
+            mfbList.inputZNr = znr;
+            mfbList.fromDate = vt;
+            mfbList.toDate = vt;
+            mfbList.filterAndShowRulesForTrain();
+            document.getElementById("nav-profile-tab").click();
+        };
+
         $(document).ready(function () {
             $('#list').bind('change', handleDialog);
         });
