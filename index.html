@@ -69,6 +69,7 @@
       .day {text-align: center;}
       .old {font-style: italic;}
       .new {font-style: italic;}
+      .rotate{transform: rotate(90deg);}
     </style>
 
     
@@ -116,6 +117,8 @@
               <div class="nav nav-tabs" id="nav-tab" role="tablist">
                 <button class="nav-link active text-danger" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Vorgänge mit MFB</button>
                 <button class="nav-link text-danger" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Züge mit MFB</button>
+                <button class="nav-link text-danger" id="nav-mfb-tab" data-bs-toggle="tab" data-bs-target="#nav-mfb" type="button" role="tab" aria-controls="nav-mfb" aria-selected="false">MFB zusammenfassen</button>
+                <button class="nav-link text-light" id="nav-edit-tab" data-bs-toggle="tab" data-bs-target="#nav-edit" type="button" role="tab" aria-controls="nav-edit" aria-selected="false">&nbsp;</button>
               </div>
             </nav>
             <div class="tab-content" id="nav-tabContent">
@@ -364,14 +367,211 @@
                 </div>
               </div>
 
+              <div class="tab-pane fade" id="nav-mfb" role="tabpanel" aria-labelledby="nav-mfb-tab">
+                <div class="col-md-8 animate-show-hide ng-show" ng-show="mfbList.loadComplete">
+                  <table class="table table-borderless">
+                    <tr>
+                        <td>
+                            <div class="input-group mb-3">
+                              <span class="input-group-text" id="basic-addon9">BOB-Vorgangsnummer</span>
+                              <input type="text" class="form-control form-control-lg" id="bob2" aria-describedby="basic-addon9" placeholder="Vorgangsnummer" ng-model="mfbList.BOB">
+                            </div>                        
+                        </td>
+                        <td>
+                          <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-secondary btn-lg" ng-click="mfbList.addBobToSequence();">
+                              <i class="fas fa-plus-circle"></i>
+                              Vorgang hinzufügen
+                           </button>  
+                          </div>                         
+                        </td>
+                        <td>
+                          <span class="animate-show-hide ng-show" ng-show="mfbList.showBOBSequence">
+                            <button type="button" class="btn btn btn-secondary btn-lg animate-show-hide ng-show" ng-show="mfbList.bobSequence.length>1" ng-click="mfbList.assignTrainsToBobnr();">
+                              <i class="fas fa-exchange-alt"></i>
+                              &nbsp;
+                              Züge nach Reihenfolge aufteilen
+                           </button>  
+                            <table class="table table-sm">
+                              <tr>
+                                <th>Reihenfolge</th>
+                                <th>BOB-Nummer</th>
+                                <th>&nbsp;</th>
+                              </tr>                            
+                              <tr ng-repeat="b in mfbList.bobSequence">
+                                <td>{{1+$index}}</td>
+                                <td>{{b}}</td>
+                                <td>
+                                  <button type="button" class="btn btn-danger btn-sm" ng-click="mfbList.deleteBobFromSequence($index);">
+                                    <i class="fas fa-trash"></i>
+                                 </button>  
+                                </td>
+                              </tr>
+                            </table>
+                          </span>
+                        </td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div class="col-md-8 animate-show-hide ng-show" ng-show="mfbList.showAssignList">
+                  <h3>Aufteilung der Züge auf Vorgänge</h3> 
+
+                  <div class="accordion" id="accordionAssign">
+                    <div class="accordion-item" ng-repeat="bob in mfbList.assignList">
+                      <h2 class="accordion-header" id="heading{{bob.bobnr}}">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{bob.bobnr}}" aria-expanded="true" aria-controls="collapse{{bob.bobnr}}">
+                          <strong>Vorgangsnummer {{bob.bobnr}}</strong>
+                        </button>
+                      </h2>
+                      <div id="collapse{{bob.bobnr}}" class="accordion-collapse collapse show" aria-labelledby="heading{{bob.bobnr}}">
+                        <div class="accordion-body">
+                          <strong class="animate-show-hide ng-show" ng-show="bob.trains.length===0">--- keine zugeordneten Züge ---</strong>
+                          <div class="animate-show-hide ng-show" ng-show="bob.trains.length>0">
+                            <table class="table" ng-repeat="tr in bob.trains">
+                              <thead>
+                                <tr class="table-secondary">
+                                  <th>
+                                    <strong>{{tr.zg}} {{tr.znr}}</strong>, Kunde {{tr.kd}}, {{tr.von}} - {{tr.bis}}
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr ng-repeat="d in tr.vt">
+                                  <td>
+                                    <table class="table table-sm table-borderless table-hover">
+                                      <thead>
+                                        <tr ng-class="{'table-secondary': mfbList.countRerouting(d.trains)<2, 'table-danger': mfbList.countRerouting(d.trains)>=2}">
+                                          <th colspan="3">
+                                            Verkehrstag {{d.day.VText}}, Anzahl Umleitungen {{mfbList.countRerouting(d.trains)}} &nbsp; &nbsp;
+                                            <button type="button btn-sm" ng-click="mfbList.editRerouting(mfbList.assignList.indexOf(bob),bob.trains.indexOf(tr), tr.vt.indexOf(d));" class="btn btn-outline-dark animate-show-hide ng-show" ng-hide="mfbList.countRerouting(d.trains)<2">
+                                              <i class="fas fa-tools"></i> Umleitung anpassen
+                                            </button>
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr ng-repeat="t in d.trains">
+                                          <td>{{t.Vorgangsnummer}}</td>
+                                          <td class="wf">
+                                            <i class="fas fa-times animate-show-hide ng-show" ng-show="t.Regelungsart==='Ausfall'"></i>
+                                            <i class="fas fa-directions animate-show-hide ng-show" ng-show="t.Regelungsart==='Umleitung'"></i>
+                                            <i class="fas fa-calendar-minus animate-show-hide ng-show" ng-show="t.Regelungsart==='Haltausfall'"></i>
+                                            <i class="fas fa-hourglass-half animate-show-hide ng-show" ng-show="t.Regelungsart==='Verspätung'"></i>
+                                            <i class="fas fa-history animate-show-hide ng-show" ng-show="t.Regelungsart==='Vorplan'"></i>
+                                            <i class="fas fa-exclamation animate-show-hide ng-show" ng-show="t.Regelungsart==='sonstige Regelungen'"></i>
+                                            {{t.Regelungsart}}
+                                          </td>
+                                          <td>
+                                            <span class="animate-show-hide ng-show" ng-hide="t['Vorplanab BS']===''">ab {{t['Vorplanab BS']}} </span>                                             
+                                            <span class="animate-show-hide ng-show" ng-hide="t.Ausfallab===''">von {{t.Ausfallab}} </span>
+                                            <span class="animate-show-hide ng-show" ng-hide="t.Ausfallbis===''">bis {{t.Ausfallbis}}</span>                                              
+                                            <span class="animate-show-hide ng-show" ng-hide="t.Umleitungsstrecke===''">{{t.Umleitungsstrecke}} +</span>
+                                            <span class="animate-show-hide ng-show" ng-hide="t['Verspätung']===''">{{t['Verspätung']}} min</span>
+                                            <span class="animate-show-hide ng-show" ng-hide="t.Bemerkung===''">, {{t.Bemerkung}}</span>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>                                  
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                                  
+                </div>
+              </div>
+
+              
+
             </div>
 
-          </div>
-          
+            <div class="tab-pane fade" id="nav-edit" role="tabpanel" aria-labelledby="nav-edit-tab">
+              <div class="col-md-9 animate-show-hide ng-show" ng-show="mfbList.loadComplete">
+                <h4>Umleitungen editieren</h4>
+                <table class="table table-hover">
+                  <thead>
+                    <tr class="table-secondary">
+                      <th>&nbsp;</th>
+                      <th>Route</th>
+                      <th>Verspätung</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="r in mfbList.routes">
+                      <td class="wf table-secondary"><i class="fas fa-directions"></i> {{r.Regelungsart}} {{1+$index}}</td>
+                      <td class="ww">{{r.Umleitungsstrecke}}</td>
+                      <td>{{r['Verspätung']}} min</td>
+                    </tr>
+                  </tbody>
+                </table>
 
-          
+                <table class="table table-hover">
+                  <thead>
+                    <tr class="table-primary">
+                      <th>&nbsp;</th>
+                      <th>Angepasste Umleitung</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="wf table-primary"><i class="fas fa-directions"></i> Neue Umleitung</td>
+                      <td class="ww">{{mfbList.newRoute}}</td>
+                    </tr>
+                    <tr>
+                      <td class="wf table-primary"><i class="fas fa-hourglass-half"></i> Neue Verspätung</td>
+                      <td>{{mfbList.newDelay}} min</td>
+                    </tr>
+                  </tbody>
+                </table>
 
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end animate-show-hide ng-show" ng-show="mfbList.newRoute!==''">
+                  <button class="btn btn-outline-danger me-md-2" ng-click="mfbList.deleteRoute();" type="button"><i class="fas fa-times"></i> Neue Umleitung zurücksetzen</button>
+                  <button class="btn btn-outline-secondary" type="button"><i class="fas fa-check"></i> Neue Umleitung anwenden</button>
+                </div>
+              </div>
+
+              <hr>
+              
+              <div class="row">
+                <div class="col-md-3" ng-repeat="rt in mfbList.stationArray">
+                  <table class="table table-sm text-center align-middle table-borderless">
+                    <thead>
+                      <tr class="table-secondary">
+                        <th colspan="2">Umleitung {{1+mfbList.stationArray.indexOf(rt)}}</th>
+                      </tr>                    
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="bf in rt.show track by $index">
+                        <td>{{bf}}</td>
+                        <td>
+                          &nbsp;
+                          <button type="button button-sm" ng-click="mfbList.addRouteFromIndex(rt.route, 0);" class="btn btn-outline-dark animate-show-hide ng-show" ng-show="$index===0">
+                            <i class="fas fa-angle-double-down"></i>
+                          </button>
+                          <button type="button button-sm" ng-click="mfbList.addRouteFromIndex(rt.route, (1+$index)/2);" class="btn btn-outline-dark animate-show-hide ng-show" ng-show="$index%2===1">
+                            <i class="fas fa-sign-out-alt rotate"></i>
+                          </button>
+                          <button type="button button-sm" ng-click="mfbList.addRouteToIndex(rt.route, (1+$index)/2);" class="btn btn-outline-dark animate-show-hide ng-show" ng-show="$index%2===1">
+                            <i class="fas fa-sign-in-alt rotate"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+            </div>
+
+          </div>  
         </div>
+
+        
+
         <div class="col-md-12">
             <p></p>
             <p><i class="fas fa-code"></i> <b>DB Netz AG</b> | Fahrplan und Kapazitätsmanagement | Region Mitte | I.NB-MI-F | 2021</p>

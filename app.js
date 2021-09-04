@@ -14,6 +14,8 @@
         mfbList.selTrain = false;
         mfbList.showTable = false;
         mfbList.showBOB = false;
+        mfbList.showBOBSequence = false;
+        mfbList.showAssignList = false;
         mfbList.Trains = [];
         mfbList.ZNr = [];
         mfbList.selectZNr = [];
@@ -22,6 +24,13 @@
         mfbList.BOBmfb = [];
         mfbList.ArrangedTrains = [];
         mfbList.ArrangedBOB = [];
+        mfbList.bobSequence = [];
+        mfbList.assignList = [];
+        mfbList.routes = [];
+        mfbList.stationArray = [];
+
+        mfbList.newRoute = '';
+        mfbList.newDelay = '';
 
         mfbList.inputZNr = '';
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -33,6 +42,131 @@
         mfbList.Options = { scrollableHeight: '300px', scrollable: true, enableSearch: true, 
         checkBoxes: true, styleActive: true, template: '{{option}}', smartButtonMaxItems: 1, smartButtonTextConverter: function(itemText, originalItem) {return 'Zugnummern auswählen'} };
         mfbList.Button = {buttonDefaultText: 'Zugnummern auswählen'};
+
+
+        mfbList.addBobToSequence = function(){
+            if(mfbList.BOB !== ''){
+                mfbList.bobSequence.push(mfbList.BOB);
+                mfbList.BOB = '';
+            }
+            if(mfbList.bobSequence.length > 0){
+                mfbList.showBOBSequence = true;
+            }else{
+                mfbList.showBOBSequence = false;
+            }        
+        };
+
+        mfbList.deleteBobFromSequence = function(index){
+            mfbList.bobSequence.splice(index, 1);
+            if(mfbList.bobSequence.length > 0){
+                mfbList.showBOBSequence = true;
+            }else{
+                mfbList.showBOBSequence = false;
+            }   
+        };
+
+        mfbList.countRerouting = function(list){
+            return list.filter((t) => t.Regelungsart === 'Umleitung').length;
+        };
+
+        mfbList.addRouteFromIndex = function(arr, index){
+            let addition = arr.slice(index).join(" - ");
+            if(mfbList.newRoute === ''){
+                mfbList.newRoute = addition;
+            }else{
+                mfbList.newRoute = mfbList.newRoute + " - " + addition;
+            }            
+        };
+
+        mfbList.addRouteToIndex = function(arr, index){
+            let addition = arr.slice(0,index).join(" - ");
+            if(mfbList.newRoute === ''){
+                mfbList.newRoute = addition;
+            }else{
+                mfbList.newRoute = mfbList.newRoute + " - " + addition;
+            }            
+        };
+        
+        mfbList.deleteRoute = function(){
+            mfbList.newRoute = '';
+        };
+
+        mfbList.editRerouting = function(bobIndex, trainIndex, vtIndex){
+            //console.log(bobIndex + " " + trainIndex + " " + vtIndex);
+            mfbList.newRoute = '';            
+            mfbList.routes = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
+            mfbList.newDelay = mfbList.routes[0]['Verspätung'];
+            mfbList.stationArray = [];
+            for (let index = 0; index < mfbList.routes.length; index+=1) {
+                const route = mfbList.routes[index].Umleitungsstrecke.split(' - ');                
+                let showRoute = [route[0]];
+                for (let j = 1; j < route.length; j+=1) {
+                    showRoute.push("|");
+                    showRoute.push(route[j]);                    
+                }
+                mfbList.stationArray.push({
+                    'route': route,
+                    'show': showRoute
+                });
+            }
+            //console.log(mfbList.stationArray);            
+            document.getElementById("nav-edit-tab").click();
+        };
+
+        mfbList.assignTrainsToBobnr = function(){
+            mfbList.assignList = [];
+            if(mfbList.bobSequence.length > 1){
+                let completeList = mfbList.Trains.filter((t) => mfbList.bobSequence.includes(t.Vorgangsnummer));
+                console.log(completeList.length);
+                if(completeList.length > 0){
+                    for (let ind = 0; ind < mfbList.bobSequence.length; ind += 1) {
+                        //console.log(ind + " " + mfbList.bobSequence.slice(0,ind));
+                        let tNr = completeList.filter((t) => t.Vorgangsnummer === mfbList.bobSequence[ind]).map((t) => t.Zugnummer);
+                        tNr = tNr.filter((item, index) => tNr.indexOf(item)===index);
+                        let doubleNr = completeList.filter((t) => mfbList.bobSequence.slice(0,ind).includes(t.Vorgangsnummer) && tNr.includes(t.Zugnummer)).map((t) => t.Zugnummer);
+                        doubleNr = doubleNr.filter((item, index) => doubleNr.indexOf(item)===index);
+                        tNr = tNr.filter((t) => doubleNr.indexOf(t) === -1).sort((a,b) =>  a - b);
+                        let trainList = [];
+                        // liste erstellen Zeile 141-149
+
+                        for (let i = 0; i < tNr.length; i+= 1) {                
+                            let vt = completeList.filter((t) => t.Zugnummer === tNr[i]).map((z) => z.Verkehrstag.VNumber);
+                            vt = vt.filter((item, index) => vt.indexOf(item)===index).sort();
+                            let d = [];
+                            for (let j = 0; j < vt.length; j+= 1) {                    
+                                d.push({ 
+                                    'day': completeList.find((z) => z.Verkehrstag.VNumber === vt[j]).Verkehrstag,
+                                    'trains': completeList.filter((z) => z.Zugnummer === tNr[i] && z.Verkehrstag.VNumber === vt[j]).sort((a,b) => (a.Regelungsart > b.Regelungsart) ? 1 : -1)
+                                });
+                            }
+                            trainList.push({
+                                'znr': tNr[i],
+                                'zg': d[0].trains[0].Zuggattung,
+                                'kd': d[0].trains[0].Kundennummer,
+                                'von': d[0].trains[0].Abgangsbahnhof,
+                                'bis': d[0].trains[0].Zielbahnhof,
+                                'vt': d
+                            });                                               
+                        }
+
+                        mfbList.assignList.push({
+                            'bobnr': mfbList.bobSequence[ind],
+                            'trains': trainList
+                        });
+                    }
+                }
+                
+                if(mfbList.assignList.length >0){
+                    mfbList.showAssignList = true;
+                }else{
+                    mfbList.showAssignList = false;
+                } 
+
+                console.log(mfbList.assignList.length);
+                console.log(mfbList.assignList[0]);
+                //console.log(mfbList.assignList[1]);
+            }            
+        };
 
 
         mfbList.filterAndShowTrains = function(){
