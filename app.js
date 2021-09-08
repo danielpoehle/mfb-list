@@ -86,7 +86,37 @@
                 mfbList.newRoute = mfbList.newRoute + " - " + addition;
             }            
         };
-        
+
+        mfbList.applyRerouting = function(){
+            let bobIndex = mfbList.stationArray[0].bobIndex;            
+            
+            for (let index = 0; index < mfbList.assignList[bobIndex].trains.length; index+=1) {
+                for (let j = 0; j < mfbList.assignList[bobIndex].trains[index].vt.length; j+=1) {
+                    let reg = mfbList.assignList[bobIndex].trains[index].vt[j].trains.filter((t) => t.Regelungsart === 'Umleitung').map((t) => t.Umleitungsstrecke);
+                    
+                    if(reg.length === 0 || reg.length !== mfbList.routes.length){continue;}
+
+                    
+                    if(mfbList.routes.map((t) => reg.indexOf(t.Umleitungsstrecke)).every((a) => a >= 0)){
+                        //console.log("remove old routes");
+                        let updateReg = JSON.parse(JSON.stringify(mfbList.assignList[bobIndex].trains[index].vt[j].trains.filter((t) => t.Regelungsart === 'Umleitung')[0]));
+                        mfbList.assignList[bobIndex].trains[index].vt[j].trains = mfbList.assignList[bobIndex].trains[index].vt[j].trains.filter((t) => t.Regelungsart !== 'Umleitung');
+                        
+                        updateReg.Umleitungsstrecke = mfbList.newRoute;
+                        updateReg['Verspätung'] = mfbList.newDelay;
+                        updateReg.Vorgangsnummer = mfbList.assignList[bobIndex].bobnr;
+                        mfbList.assignList[bobIndex].trains[index].vt[j].trains.push(updateReg);
+                        //console.log(mfbList.assignList[bobIndex].trains[index].vt[j]);
+                        document.getElementById("nav-mfb-tab").click();
+                        document.getElementById("tbl-51827-4").scrollIntoView();
+                    }
+
+                    
+                    
+                }                
+            }
+        };
+
         mfbList.deleteRoute = function(){
             mfbList.newRoute = '';
         };
@@ -105,6 +135,7 @@
                     showRoute.push(route[j]);                    
                 }
                 mfbList.stationArray.push({
+                    'bobIndex': bobIndex,
                     'route': route,
                     'show': showRoute
                 });
@@ -127,7 +158,7 @@
                         doubleNr = doubleNr.filter((item, index) => doubleNr.indexOf(item)===index);
                         tNr = tNr.filter((t) => doubleNr.indexOf(t) === -1).sort((a,b) =>  a - b);
                         let trainList = [];
-                        // liste erstellen Zeile 141-149
+                        
 
                         for (let i = 0; i < tNr.length; i+= 1) {                
                             let vt = completeList.filter((t) => t.Zugnummer === tNr[i]).map((z) => z.Verkehrstag.VNumber);
