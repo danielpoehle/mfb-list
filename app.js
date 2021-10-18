@@ -16,6 +16,7 @@
         mfbList.showBOB = false;
         mfbList.showBOBSequence = false;
         mfbList.showAssignList = false;
+        mfbList.filter2Reroutes = true;
         mfbList.Trains = [];
         mfbList.ZNr = [];
         mfbList.selectZNr = [];
@@ -108,7 +109,7 @@
                         mfbList.assignList[bobIndex].trains[index].vt[j].trains.push(updateReg);
                         //console.log(mfbList.assignList[bobIndex].trains[index].vt[j]);
                         document.getElementById("nav-mfb-tab").click();
-                        document.getElementById("tbl-51827-4").scrollIntoView();
+                        //document.getElementById("tbl-51827-4").scrollIntoView();
                     }
 
                     
@@ -119,6 +120,18 @@
 
         mfbList.deleteRoute = function(){
             mfbList.newRoute = '';
+        };
+
+        mfbList.deleteDoubleReroute = function(bobIndex, trainIndex, vtIndex){            
+            mfbList.routes = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
+            let routes = mfbList.routes.map((t) => t.Umleitungsstrecke);
+            if(routes.every((r) => r === routes[0])){
+                let newRoute = JSON.parse(JSON.stringify(mfbList.routes[0]));
+                newRoute.Vorgangsnummer = mfbList.assignList[bobIndex].bobnr;
+                mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart !== 'Umleitung');
+                mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.push(newRoute);
+                console.log(newRoute);
+            }            
         };
 
         mfbList.editRerouting = function(bobIndex, trainIndex, vtIndex){
