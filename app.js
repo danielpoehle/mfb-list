@@ -39,6 +39,8 @@
         mfbList.toDate = mfbList.fromDate;
         mfbList.showRules = false;
         mfbList.ArrangedRules = [];
+        mfbList.bobVorplan = [];
+        mfbList.bobDelay = [];
 
         mfbList.Options = { scrollableHeight: '300px', scrollable: true, enableSearch: true, 
         checkBoxes: true, styleActive: true, template: '{{option}}', smartButtonMaxItems: 1, smartButtonTextConverter: function(itemText, originalItem) {return 'Zugnummern auswählen'} };
@@ -136,6 +138,8 @@
 
         mfbList.editRerouting = function(bobIndex, trainIndex, vtIndex){
             //console.log(bobIndex + " " + trainIndex + " " + vtIndex);
+            mfbList.bobVorplan = [];
+            mfbList.bobDelay = [];
             mfbList.newRoute = '';            
             mfbList.routes = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
             mfbList.newDelay = mfbList.routes[0]['Verspätung'];
@@ -153,6 +157,13 @@
                     'show': showRoute
                 });
             }
+
+            let allRules = mfbList.Trains.filter((t) => t.Zugnummer === mfbList.routes[0].Zugnummer && t.Verkehrstag.VNumber === mfbList.routes[0].Verkehrstag.VNumber);
+            let bobVorplan = allRules.filter((r) => r.Regelungsart === "Vorplan").map((r) => r.Vorgangsnummer);
+            mfbList.bobVorplan = bobVorplan.filter((item, index) => bobVorplan.indexOf(item)===index).sort();
+
+            let bobDelay = allRules.filter((r) => r.Regelungsart === "Verspätung").map((r) => r.Vorgangsnummer);
+            mfbList.bobDelay = bobDelay.filter((item, index) => bobDelay.indexOf(item)===index).sort();
             //console.log(mfbList.stationArray);            
             document.getElementById("nav-edit-tab").click();
         };

@@ -500,7 +500,7 @@
 
             <div class="tab-pane fade" id="nav-edit" role="tabpanel" aria-labelledby="nav-edit-tab">
               <div class="col-md-9 animate-show-hide ng-show" ng-show="mfbList.loadComplete">
-                <h4>Umleitungen editieren</h4>
+                <h4>Umleitungen für <strong>{{mfbList.routes[0].Zuggattung}} {{mfbList.routes[0].Zugnummer}}</strong> editieren</h4>
                 <table class="table table-hover">
                   <thead>
                     <tr class="table-secondary">
@@ -550,6 +550,33 @@
                   <button class="btn btn-outline-danger me-md-2" ng-click="mfbList.deleteRoute();" type="button"><i class="fas fa-times"></i> Neue Umleitung zurücksetzen</button>
                   <button class="btn btn-outline-secondary" ng-click="mfbList.applyRerouting();" type="button"><i class="fas fa-check"></i> Neue Umleitung anwenden</button>
                 </div>
+              </div>
+
+              <hr>
+
+              <div>
+                <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length > 0">
+                  <i class="fas fa-history"></i>
+                  Der Zug hat <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length ===1">im Vorgang</span> 
+                  <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length > 1">in den Vorgängen</span> {{mfbList.bobVorplan.join(', ')}} eine Vorplanabfahrt.
+                </span>
+                <span class="animate-show-hide ng-show" ng-hide="mfbList.bobVorplan.length > 0">
+                  <i class="fas fa-times"></i>
+                  Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang am {{mfbList.routes[0].Verkehrstag.VText}} eine Vorplanabfahrt.
+                </span>
+              </div>
+
+              <div>
+                <span class="animate-show-hide ng-show" ng-show="mfbList.bobDelay.length > 0">
+                  <i class="fas fa-hourglass-half"></i>
+                  Der Zug hat <span class="animate-show-hide ng-show" ng-show="mfbList.bobDelay.length ===1">im Vorgang</span> 
+                  <span class="animate-show-hide ng-show" ng-show="mfbList.bobDelay.length > 1">in den Vorgängen</span> 
+                  {{mfbList.bobDelay.join(', ')}} am {{mfbList.routes[0].Verkehrstag.VText}} eine geplante Verspätung.
+                </span>
+                <span class="animate-show-hide ng-show" ng-hide="mfbList.bobDelay.length > 0">
+                  <i class="fas fa-times"></i>
+                  Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang am {{mfbList.routes[0].Verkehrstag.VText}} eine geplante Verspätung.
+                </span>
               </div>
 
               <hr>
