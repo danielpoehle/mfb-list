@@ -543,6 +543,14 @@
                         </div> 
                       </td>
                     </tr>
+                    <tr>
+                      <td class="wf table-primary"><i class="fas fa-file-alt"></i> Neue Bemerkung</td>
+                      <td>
+                        <div class="mb-3">
+                          <textarea class="form-control" id="mergedNote" rows="4" ng-model="mfbList.mergedNote"></textarea>
+                        </div>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
 
@@ -558,7 +566,11 @@
                 <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length > 0">
                   <i class="fas fa-history"></i>
                   Der Zug hat <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length ===1">im Vorgang</span> 
-                  <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length > 1">in den Vorgängen</span> {{mfbList.bobVorplan.join(', ')}} eine Vorplanabfahrt.
+                  <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length > 1">in den Vorgängen</span> 
+                  {{mfbList.bobVorplan.join(', ')}} eine Vorplanabfahrt.
+                  <button type="button button-sm" ng-click="mfbList.addVorplanNote();" class="btn btn-outline-dark">
+                    <i class="far fa-caret-square-up"></i> Bemerkung ergänzen
+                  </button>
                 </span>
                 <span class="animate-show-hide ng-show" ng-hide="mfbList.bobVorplan.length > 0">
                   <i class="fas fa-times"></i>
@@ -572,6 +584,9 @@
                   Der Zug hat <span class="animate-show-hide ng-show" ng-show="mfbList.bobDelay.length ===1">im Vorgang</span> 
                   <span class="animate-show-hide ng-show" ng-show="mfbList.bobDelay.length > 1">in den Vorgängen</span> 
                   {{mfbList.bobDelay.join(', ')}} am {{mfbList.routes[0].Verkehrstag.VText}} eine geplante Verspätung.
+                  <button type="button button-sm" ng-click="mfbList.addDelayNote();" class="btn btn-outline-dark">
+                    <i class="far fa-caret-square-up"></i> Bemerkung ergänzen
+                  </button>
                 </span>
                 <span class="animate-show-hide ng-show" ng-hide="mfbList.bobDelay.length > 0">
                   <i class="fas fa-times"></i>

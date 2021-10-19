@@ -41,6 +41,7 @@
         mfbList.ArrangedRules = [];
         mfbList.bobVorplan = [];
         mfbList.bobDelay = [];
+        mfbList.mergedNote = '';
 
         mfbList.Options = { scrollableHeight: '300px', scrollable: true, enableSearch: true, 
         checkBoxes: true, styleActive: true, template: '{{option}}', smartButtonMaxItems: 1, smartButtonTextConverter: function(itemText, originalItem) {return 'Zugnummern auswählen'} };
@@ -108,6 +109,7 @@
                         updateReg.Umleitungsstrecke = mfbList.newRoute;
                         updateReg['Verspätung'] = mfbList.newDelay;
                         updateReg.Vorgangsnummer = mfbList.assignList[bobIndex].bobnr;
+                        updateReg.Bemerkung = mfbList.mergedNote;
                         mfbList.assignList[bobIndex].trains[index].vt[j].trains.push(updateReg);
                         //console.log(mfbList.assignList[bobIndex].trains[index].vt[j]);
                         document.getElementById("nav-mfb-tab").click();
@@ -140,7 +142,8 @@
             //console.log(bobIndex + " " + trainIndex + " " + vtIndex);
             mfbList.bobVorplan = [];
             mfbList.bobDelay = [];
-            mfbList.newRoute = '';            
+            mfbList.newRoute = '';
+            mfbList.mergedNote = '';            
             mfbList.routes = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
             mfbList.newDelay = mfbList.routes[0]['Verspätung'];
             mfbList.stationArray = [];
@@ -158,6 +161,12 @@
                 });
             }
 
+            let note1 = mfbList.routes.map((r) => r.Vorgangsnummer);
+            note1 = note1.filter((item, index) => note1.indexOf(item)===index).sort().join(', ');
+            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.fromDate + ')\n';
+
+            mfbList.mergedNote = note1 + mfbList.routes.map((r) => r.Bemerkung).join(', ');
+
             let allRules = mfbList.Trains.filter((t) => t.Zugnummer === mfbList.routes[0].Zugnummer && t.Verkehrstag.VNumber === mfbList.routes[0].Verkehrstag.VNumber);
             let bobVorplan = allRules.filter((r) => r.Regelungsart === "Vorplan").map((r) => r.Vorgangsnummer);
             mfbList.bobVorplan = bobVorplan.filter((item, index) => bobVorplan.indexOf(item)===index).sort();
@@ -166,6 +175,14 @@
             mfbList.bobDelay = bobDelay.filter((item, index) => bobDelay.indexOf(item)===index).sort();
             //console.log(mfbList.stationArray);            
             document.getElementById("nav-edit-tab").click();
+        };
+
+        mfbList.addVorplanNote = function(){
+            mfbList.mergedNote = mfbList.mergedNote + " Zielrechnung beachten durch Vorplan aus Maßnahme " + mfbList.bobVorplan.join(', ');
+        };
+
+        mfbList.addDelayNote = function(){
+            mfbList.mergedNote = mfbList.mergedNote + " Verspätung berücksichtigen aus Maßnahme " + mfbList.bobDelay.join(', ');
         };
 
         mfbList.assignTrainsToBobnr = function(){
