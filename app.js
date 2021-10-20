@@ -163,7 +163,7 @@
 
             let note1 = mfbList.routes.map((r) => r.Vorgangsnummer);
             note1 = note1.filter((item, index) => note1.indexOf(item)===index).sort().join(', ');
-            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.fromDate + ')\n';
+            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.fromDate + ') ';
 
             mfbList.mergedNote = note1 + mfbList.routes.map((r) => r.Bemerkung).join(', ');
 
@@ -357,6 +357,54 @@
             mfbList.toDate = vt;
             mfbList.filterAndShowRulesForTrain();
             document.getElementById("nav-profile-tab").click();
+        };
+
+        mfbList.download = function() {
+
+            let filename = mfbList.fromDate + '-Aufteilung-' + mfbList.bobSequence.join('+') + '.csv';
+            console.log(filename);
+            let text = encodeURIComponent(createCsvText());
+
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + text);
+            element.setAttribute('download', filename);
+        
+            element.style.display = 'none';
+            document.body.appendChild(element);
+        
+            element.click();
+        
+            document.body.removeChild(element);
+        }
+
+        function createCsvText(){
+
+            let text = '';
+
+            for (let i = 0; i < mfbList.assignList.length; i+= 1) {
+                const element = mfbList.assignList[i];
+                text += 'Vorgang ' + element.bobnr + ';;;;;;;;\n';
+                text += 'Vorgang;Kunde;Zugnummer;Tag;Regelung;Laufweg;Bemerkung;Status;\n';
+                for (let j = 0; j < element.trains.length; j+= 1) {
+                    const train = element.trains[j];
+                    for (let k = 0; k < train.vt.length; k++) {
+                        const vt = train.vt[k];
+                        for (let n = 0; n < vt.trains.length; n++) {
+                            const regelung = vt.trains[n];
+                            text += regelung.Vorgangsnummer + ';' + regelung.Kundennummer + ';' + regelung.Zugnummer + ';';
+                            text += regelung.Verkehrstag.VText + ';' + regelung.Regelungsart + ';';
+                            if(regelung.Regelungsart === 'Verspätung'){text += regelung.Verspätung + ';';}
+                            else if(regelung.Regelungsart === 'Umleitung'){text += regelung.Umleitungsstrecke + ';';}
+                            else if(regelung.Regelungsart === 'Ausfall'){text += 'von ' + regelung.Ausfallab + ' bis ' + regelung.Ausfallbis + ';';}
+                            else if(regelung.Regelungsart === 'Vorplan'){text += 'ab ' + regelung['Vorplanab BS'] + ';';}
+                            else {text += ';';}
+                            text += regelung.Bemerkung + ';;\n';
+                        }
+                    }
+                }
+                text += ';;;;;;;;\n';                
+            }
+            return text;
         };
 
         $(document).ready(function () {
