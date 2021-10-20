@@ -393,7 +393,7 @@
                             const regelung = vt.trains[n];
                             text += regelung.Vorgangsnummer + ';' + regelung.Kundennummer + ';' + regelung.Zugnummer + ';';
                             text += regelung.Verkehrstag.VText + ';' + regelung.Regelungsart + ';';
-                            if(regelung.Regelungsart === 'Verspätung'){text += regelung.Verspätung + ';';}
+                            if(regelung.Regelungsart === 'Verspätung'){text += regelung.Verspätung + ' min;';}
                             else if(regelung.Regelungsart === 'Umleitung'){text += regelung.Umleitungsstrecke + ';';}
                             else if(regelung.Regelungsart === 'Ausfall'){text += 'von ' + regelung.Ausfallab + ' bis ' + regelung.Ausfallbis + ';';}
                             else if(regelung.Regelungsart === 'Vorplan'){text += 'ab ' + regelung['Vorplanab BS'] + ';';}
