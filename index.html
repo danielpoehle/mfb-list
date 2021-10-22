@@ -505,7 +505,9 @@
 
             <div class="tab-pane fade" id="nav-edit" role="tabpanel" aria-labelledby="nav-edit-tab">
               <div class="col-md-9 animate-show-hide ng-show" ng-show="mfbList.loadComplete">
-                <h4>Umleitungen für <strong>{{mfbList.routes[0].Zuggattung}} {{mfbList.routes[0].Zugnummer}}</strong> editieren</h4>
+                <h4>Umleitungen für <strong>{{mfbList.routes[0].Zuggattung}} {{mfbList.routes[0].Zugnummer}}</strong> editieren 
+                  ({{mfbList.routes[0].Abgangsbahnhof}} - {{mfbList.routes[0].Zielbahnhof}})
+                </h4>
                 <table class="table table-hover">
                   <thead>
                     <tr class="table-secondary">
@@ -516,7 +518,7 @@
                   </thead>
                   <tbody>
                     <tr ng-repeat="r in mfbList.routes">
-                      <td class="wf table-secondary"><i class="fas fa-directions"></i> {{r.Regelungsart}} {{1+$index}}</td>
+                      <td class="wf table-secondary"><i class="fas fa-directions"></i> {{r.Regelungsart}} {{1+$index}} aus Vorgang {{r.Vorgangsnummer}}</td>
                       <td class="ww">{{r.Umleitungsstrecke}}</td>
                       <td>{{r['Verspätung']}} min</td>
                     </tr>
@@ -606,7 +608,7 @@
                   <table class="table table-sm text-center align-middle table-borderless">
                     <thead>
                       <tr class="table-secondary">
-                        <th colspan="2">Umleitung {{1+mfbList.stationArray.indexOf(rt)}}</th>
+                        <th colspan="2">Umleitung {{1+mfbList.stationArray.indexOf(rt)}} (Vorgang {{mfbList.routes[mfbList.stationArray.indexOf(rt)].Vorgangsnummer}})</th>
                       </tr>                    
                     </thead>
                     <tbody>
