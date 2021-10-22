@@ -571,33 +571,53 @@
 
               <div>
                 <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length > 0">
-                  <i class="fas fa-history"></i>
-                  Der Zug hat <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length ===1">im Vorgang</span> 
-                  <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length > 1">in den Vorgängen</span> 
-                  {{mfbList.bobVorplan.join(', ')}} eine Vorplanabfahrt.
-                  <button type="button button-sm" ng-click="mfbList.addVorplanNote();" class="btn btn-outline-dark">
-                    <i class="far fa-caret-square-up"></i> Bemerkung ergänzen
-                  </button>
+                  <div ng-repeat="v in mfbList.bobVorplan">
+                    <i class="fas fa-history"></i>
+                    Der Zug hat am {{v.vt}} im Vorgang {{v.bobVorplan.join(', ')}} eine Vorplanabfahrt.
+                    <button type="button button-sm" ng-click="mfbList.addVorplanNote($index);" class="btn btn-outline-dark">
+                      <i class="far fa-caret-square-up"></i> Bemerkung ergänzen
+                    </button>
+                  </div>                  
                 </span>
                 <span class="animate-show-hide ng-show" ng-hide="mfbList.bobVorplan.length > 0">
                   <i class="fas fa-times"></i>
-                  Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang am {{mfbList.routes[0].Verkehrstag.VText}} eine Vorplanabfahrt.
+                  Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang eine Vorplanabfahrt.
+                </span>
+              </div> 
+              
+              <hr>
+
+              <div>
+                <span class="animate-show-hide ng-show" ng-show="mfbList.bobReroute.length > 0">
+                  <div ng-repeat="v in mfbList.bobReroute">
+                    <i class="fas fa-directions"></i>
+                    Der Zug hat am {{v.vt}} im Vorgang {{v.bobReroute.join(', ')}} eine weitere Umleitung.
+                    <button type="button button-sm" ng-click="mfbList.addRerouteNote($index);" class="btn btn-outline-dark">
+                      <i class="far fa-caret-square-up"></i> Bemerkung ergänzen
+                    </button>
+                  </div>                  
+                </span>
+                <span class="animate-show-hide ng-show" ng-hide="mfbList.bobReroute.length > 0">
+                  <i class="fas fa-times"></i>
+                  Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang eine weitere Umleitung.
                 </span>
               </div>
 
+              <hr>
+
               <div>
                 <span class="animate-show-hide ng-show" ng-show="mfbList.bobDelay.length > 0">
-                  <i class="fas fa-hourglass-half"></i>
-                  Der Zug hat <span class="animate-show-hide ng-show" ng-show="mfbList.bobDelay.length ===1">im Vorgang</span> 
-                  <span class="animate-show-hide ng-show" ng-show="mfbList.bobDelay.length > 1">in den Vorgängen</span> 
-                  {{mfbList.bobDelay.join(', ')}} am {{mfbList.routes[0].Verkehrstag.VText}} eine geplante Verspätung.
-                  <button type="button button-sm" ng-click="mfbList.addDelayNote();" class="btn btn-outline-dark">
-                    <i class="far fa-caret-square-up"></i> Bemerkung ergänzen
-                  </button>
+                  <div ng-repeat="v in mfbList.bobDelay">
+                    <i class="fas fa-hourglass-half"></i>
+                    Der Zug hat am {{v.vt}} im Vorgang {{v.bobDelay.join(', ')}} eine Verspätung.
+                    <button type="button button-sm" ng-click="mfbList.addDelayNote($index);" class="btn btn-outline-dark">
+                      <i class="far fa-caret-square-up"></i> Bemerkung ergänzen
+                    </button>
+                  </div>                  
                 </span>
                 <span class="animate-show-hide ng-show" ng-hide="mfbList.bobDelay.length > 0">
                   <i class="fas fa-times"></i>
-                  Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang am {{mfbList.routes[0].Verkehrstag.VText}} eine geplante Verspätung.
+                  Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang eine Verspätung.
                 </span>
               </div>
 

@@ -41,6 +41,7 @@
         mfbList.ArrangedRules = [];
         mfbList.bobVorplan = [];
         mfbList.bobDelay = [];
+        mfbList.bobReroute = [];
         mfbList.mergedNote = '';
 
         mfbList.Options = { scrollableHeight: '300px', scrollable: true, enableSearch: true, 
@@ -92,34 +93,29 @@
         };
 
         mfbList.applyRerouting = function(){
-            let bobIndex = mfbList.stationArray[0].bobIndex;            
+            let bobIndex = mfbList.stationArray[0].bobIndex; 
+            let trainIndex = mfbList.stationArray[0].trainIndex;  
             
-            for (let index = 0; index < mfbList.assignList[bobIndex].trains.length; index+=1) {
-                for (let j = 0; j < mfbList.assignList[bobIndex].trains[index].vt.length; j+=1) {
-                    let reg = mfbList.assignList[bobIndex].trains[index].vt[j].trains.filter((t) => t.Regelungsart === 'Umleitung').map((t) => t.Umleitungsstrecke);
+                for (let j = 0; j < mfbList.assignList[bobIndex].trains[trainIndex].vt.length; j+=1) {
+                    let reg = mfbList.assignList[bobIndex].trains[trainIndex].vt[j].trains.filter((t) => t.Regelungsart === 'Umleitung').map((t) => t.Umleitungsstrecke);
                     
                     if(reg.length === 0 || reg.length !== mfbList.routes.length){continue;}
-
                     
                     if(mfbList.routes.map((t) => reg.indexOf(t.Umleitungsstrecke)).every((a) => a >= 0)){
                         //console.log("remove old routes");
-                        let updateReg = JSON.parse(JSON.stringify(mfbList.assignList[bobIndex].trains[index].vt[j].trains.filter((t) => t.Regelungsart === 'Umleitung')[0]));
-                        mfbList.assignList[bobIndex].trains[index].vt[j].trains = mfbList.assignList[bobIndex].trains[index].vt[j].trains.filter((t) => t.Regelungsart !== 'Umleitung');
+                        let updateReg = JSON.parse(JSON.stringify(mfbList.assignList[bobIndex].trains[trainIndex].vt[j].trains.filter((t) => t.Regelungsart === 'Umleitung')[0]));
+                        mfbList.assignList[bobIndex].trains[trainIndex].vt[j].trains = mfbList.assignList[bobIndex].trains[trainIndex].vt[j].trains.filter((t) => t.Regelungsart !== 'Umleitung');
                         
                         updateReg.Umleitungsstrecke = mfbList.newRoute;
                         updateReg['Verspätung'] = mfbList.newDelay;
                         updateReg.Vorgangsnummer = mfbList.assignList[bobIndex].bobnr;
                         updateReg.Bemerkung = mfbList.mergedNote;
-                        mfbList.assignList[bobIndex].trains[index].vt[j].trains.push(updateReg);
+                        mfbList.assignList[bobIndex].trains[trainIndex].vt[j].trains.push(updateReg);
                         //console.log(mfbList.assignList[bobIndex].trains[index].vt[j]);
                         document.getElementById("nav-mfb-tab").click();
                         //document.getElementById("tbl-51827-4").scrollIntoView();
                     }
-
-                    
-                    
-                }                
-            }
+                }      
         };
 
         mfbList.deleteRoute = function(){
@@ -142,6 +138,7 @@
             //console.log(bobIndex + " " + trainIndex + " " + vtIndex);
             mfbList.bobVorplan = [];
             mfbList.bobDelay = [];
+            mfbList.bobReroute = [];
             mfbList.newRoute = '';
             mfbList.mergedNote = '';            
             mfbList.routes = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
@@ -156,6 +153,7 @@
                 }
                 mfbList.stationArray.push({
                     'bobIndex': bobIndex,
+                    'trainIndex': trainIndex,
                     'route': route,
                     'show': showRoute
                 });
@@ -167,22 +165,55 @@
 
             mfbList.mergedNote = note1 + mfbList.routes.map((r) => r.Bemerkung).join(', ');
 
-            let allRules = mfbList.Trains.filter((t) => t.Zugnummer === mfbList.routes[0].Zugnummer && t.Verkehrstag.VNumber === mfbList.routes[0].Verkehrstag.VNumber);
-            let bobVorplan = allRules.filter((r) => r.Regelungsart === "Vorplan").map((r) => r.Vorgangsnummer);
-            mfbList.bobVorplan = bobVorplan.filter((item, index) => bobVorplan.indexOf(item)===index).sort();
+            let allDays = mfbList.assignList[bobIndex].trains[trainIndex].vt.map((t) => t.day.VText);
+            for (let k = 0; k < allDays.length; k+=1) {
+                let allRules = mfbList.Trains.filter((t) => t.Zugnummer === mfbList.routes[0].Zugnummer && t.Verkehrstag.VText === allDays[k]);
 
-            let bobDelay = allRules.filter((r) => r.Regelungsart === "Verspätung").map((r) => r.Vorgangsnummer);
-            mfbList.bobDelay = bobDelay.filter((item, index) => bobDelay.indexOf(item)===index).sort();
+                let bobVorplan = allRules.filter((r) => r.Regelungsart === "Vorplan").map((r) => r.Vorgangsnummer);
+                bobVorplan = bobVorplan.filter((e) => !mfbList.bobSequence.includes(e));
+                if(bobVorplan.length > 0){
+                    mfbList.bobVorplan.push({
+                        'vt': allDays[k],
+                        'bobVorplan': bobVorplan.filter((item, index) => bobVorplan.indexOf(item)===index).sort()
+                    });
+                }
+
+                let bobDelay = allRules.filter((r) => r.Regelungsart === "Verspätung").map((r) => r.Vorgangsnummer);
+                bobDelay = bobDelay.filter((e) => !mfbList.bobSequence.includes(e));
+                if(bobDelay.length > 0){
+                    mfbList.bobDelay.push({
+                        'vt': allDays[k],
+                        'bobDelay': bobDelay.filter((item, index) => bobDelay.indexOf(item)===index).sort()
+                    });
+                }
+
+                let bobReroute = allRules.filter((r) => r.Regelungsart === "Umleitung").map((r) => r.Vorgangsnummer);
+                bobReroute = bobReroute.filter((e) => !mfbList.bobSequence.includes(e));
+                if(bobReroute.length > 0){
+                    mfbList.bobReroute.push({
+                        'vt': allDays[k],
+                        'bobReroute': bobReroute.filter((item, index) => bobReroute.indexOf(item)===index).sort()
+                    });
+                }
+                
+            }            
             //console.log(mfbList.stationArray);            
             document.getElementById("nav-edit-tab").click();
         };
 
-        mfbList.addVorplanNote = function(){
-            mfbList.mergedNote = mfbList.mergedNote + " Zielrechnung beachten durch Vorplan aus Maßnahme " + mfbList.bobVorplan.join(', ');
+        mfbList.addVorplanNote = function(i){
+            mfbList.mergedNote = mfbList.mergedNote + " Zielrechnung beachten durch Vorplan aus Maßnahme " + 
+            mfbList.bobVorplan[i].bobVorplan.join(', ') + " am " + mfbList.bobVorplan[i].vt;
         };
 
-        mfbList.addDelayNote = function(){
-            mfbList.mergedNote = mfbList.mergedNote + " Verspätung berücksichtigen aus Maßnahme " + mfbList.bobDelay.join(', ');
+        mfbList.addRerouteNote = function(i){
+            mfbList.mergedNote = mfbList.mergedNote + " Zusätzliche Umleitung beachten aus Maßnahme " + 
+            mfbList.bobReroute[i].bobReroute.join(', ') + " am " + mfbList.bobReroute[i].vt;
+        };
+
+        mfbList.addDelayNote = function(i){
+            mfbList.mergedNote = mfbList.mergedNote + " Verspätung berücksichtigen aus Maßnahme " + 
+            mfbList.bobDelay[i].bobDelay.join(', ') + " am " + mfbList.bobDelay[i].vt;
         };
 
         mfbList.assignTrainsToBobnr = function(){
