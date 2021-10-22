@@ -122,6 +122,10 @@
             mfbList.newRoute = '';
         };
 
+        mfbList.ignoreRerouting = function(bobIndex, trainIndex, vtIndex){
+            mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].ignore = true;
+        };
+
         mfbList.deleteDoubleReroute = function(bobIndex, trainIndex, vtIndex){            
             mfbList.routes = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
             let routes = mfbList.routes.map((t) => t.Umleitungsstrecke);
@@ -183,16 +187,17 @@
                 if(bobDelay.length > 0){
                     mfbList.bobDelay.push({
                         'vt': allDays[k],
-                        'bobDelay': bobDelay.filter((item, index) => bobDelay.indexOf(item)===index).sort()
+                        'bobDelay': bobDelay.filter((item, index) => bobDelay.indexOf(item)===index).sort()                        
                     });
-                }
+                } 
 
                 let bobReroute = allRules.filter((r) => r.Regelungsart === "Umleitung").map((r) => r.Vorgangsnummer);
                 bobReroute = bobReroute.filter((e) => !mfbList.bobSequence.includes(e));
                 if(bobReroute.length > 0){
                     mfbList.bobReroute.push({
                         'vt': allDays[k],
-                        'bobReroute': bobReroute.filter((item, index) => bobReroute.indexOf(item)===index).sort()
+                        'bobReroute': bobReroute.filter((item, index) => bobReroute.indexOf(item)===index).sort(),
+                        'highlight': bobReroute.some((e)=> new RegExp('^5').test(e))
                     });
                 }
                 
@@ -239,7 +244,8 @@
                             for (let j = 0; j < vt.length; j+= 1) {                    
                                 d.push({ 
                                     'day': completeList.find((z) => z.Verkehrstag.VNumber === vt[j]).Verkehrstag,
-                                    'trains': completeList.filter((z) => z.Zugnummer === tNr[i] && z.Verkehrstag.VNumber === vt[j]).sort((a,b) => (a.Regelungsart > b.Regelungsart) ? 1 : -1)
+                                    'trains': completeList.filter((z) => z.Zugnummer === tNr[i] && z.Verkehrstag.VNumber === vt[j]).sort((a,b) => (a.Regelungsart > b.Regelungsart) ? 1 : -1),
+                                    'ignore': false
                                 });
                             }
                             trainList.push({

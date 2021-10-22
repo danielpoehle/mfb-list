@@ -448,7 +448,7 @@
                                 </tr>
                               </thead>
                               <tbody>
-                                <tr ng-repeat="d in tr.vt" class="animate-show-hide ng-show" ng-hide="mfbList.filter2Reroutes && mfbList.countRerouting(d.trains)<2">
+                                <tr ng-repeat="d in tr.vt" class="animate-show-hide ng-show" ng-hide="mfbList.filter2Reroutes && (d.ignore || mfbList.countRerouting(d.trains)<2)">
                                   <td>
                                     <table class="table table-sm table-borderless table-hover"> 
                                       <thead>
@@ -460,6 +460,9 @@
                                             </button>
                                             <button type="button btn-sm" ng-click="mfbList.deleteDoubleReroute(mfbList.assignList.indexOf(bob),bob.trains.indexOf(tr), tr.vt.indexOf(d));" class="btn btn-outline-dark animate-show-hide ng-show" ng-hide="mfbList.countRerouting(d.trains)<2">
                                               <i class="fas fa-compress-alt"></i> Doppelte Umleitung löschen
+                                            </button>
+                                            <button type="button btn-sm" ng-click="mfbList.ignoreRerouting(mfbList.assignList.indexOf(bob),bob.trains.indexOf(tr), tr.vt.indexOf(d));" class="btn btn-outline-dark animate-show-hide ng-show" ng-hide="mfbList.countRerouting(d.trains)<2">
+                                              <i class="fas fa-eye-slash"></i> Umleitungen ausblenden
                                             </button>
                                           </th>
                                         </tr>
@@ -591,7 +594,10 @@
                 <span class="animate-show-hide ng-show" ng-show="mfbList.bobReroute.length > 0">
                   <div ng-repeat="v in mfbList.bobReroute">
                     <i class="fas fa-directions"></i>
-                    Der Zug hat am {{v.vt}} im Vorgang {{v.bobReroute.join(', ')}} eine weitere Umleitung.
+                    Der Zug hat am {{v.vt}} im 
+                    <strong class="animate-show-hide ng-show" ng-show="v.highlight">Vorgang {{v.bobReroute.join(', ')}}</strong>
+                    <span class="animate-show-hide ng-show" ng-hide="v.highlight">Vorgang {{v.bobReroute.join(', ')}}</span>
+                    eine weitere Umleitung.
                     <button type="button button-sm" ng-click="mfbList.addRerouteNote($index);" class="btn btn-outline-dark">
                       <i class="far fa-caret-square-up"></i> Bemerkung ergänzen
                     </button>
