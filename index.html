@@ -478,6 +478,9 @@
                                             <i class="fas fa-history animate-show-hide ng-show" ng-show="t.Regelungsart==='Vorplan'"></i>
                                             <i class="fas fa-exclamation animate-show-hide ng-show" ng-show="t.Regelungsart==='sonstige Regelungen'"></i>
                                             {{t.Regelungsart}}
+                                            <button type="button btn-sm" ng-click="mfbList.quickSelectRouting(mfbList.assignList.indexOf(bob),bob.trains.indexOf(tr), tr.vt.indexOf(d), d.trains.indexOf(t));" class="btn btn-outline-dark animate-show-hide ng-show" ng-show="t.Regelungsart==='Umleitung'&&mfbList.countRerouting(d.trains)>1">
+                                              <i class="fas fa-crosshairs"></i>
+                                            </button>
                                           </td>
                                           <td>
                                             <span class="animate-show-hide ng-show" ng-hide="t['Vorplanab BS']===''">ab {{t['Vorplanab BS']}} </span>                                             

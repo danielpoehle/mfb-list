@@ -126,6 +126,13 @@
             mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].ignore = true;
         };
 
+        mfbList.quickSelectRouting = function(bobIndex, trainIndex, vtIndex, routeIndex){
+            let newRoute = JSON.parse(JSON.stringify(mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains[routeIndex]));
+            mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart !== 'Umleitung');            
+            mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.push(newRoute);
+
+        };
+
         mfbList.deleteDoubleReroute = function(bobIndex, trainIndex, vtIndex){            
             mfbList.routes = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
             let routes = mfbList.routes.map((t) => t.Umleitungsstrecke);
@@ -134,7 +141,7 @@
                 newRoute.Vorgangsnummer = mfbList.assignList[bobIndex].bobnr;
                 mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart !== 'Umleitung');
                 mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.push(newRoute);
-                console.log(newRoute);
+                //console.log(newRoute);
             }            
         };
 
