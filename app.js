@@ -128,6 +128,18 @@
 
         mfbList.quickSelectRouting = function(bobIndex, trainIndex, vtIndex, routeIndex){
             let newRoute = JSON.parse(JSON.stringify(mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains[routeIndex]));
+            
+
+            let r = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
+            console.log(mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains);
+            console.log(r);
+
+            let note1 = r.map((t) => t.Vorgangsnummer);
+            note1 = note1.filter((item, index) => note1.indexOf(item)===index).sort().join(', ');
+            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.fromDate + ') ';
+
+            newRoute.Bemerkung = note1 + newRoute.Bemerkung;
+
             mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart !== 'Umleitung');            
             mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.push(newRoute);
 
