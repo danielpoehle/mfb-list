@@ -576,6 +576,30 @@
               <hr>
 
               <div>
+                <span class="animate-show-hide ng-show" ng-show="mfbList.bobCancel.length > 0">
+                  <div ng-repeat="v in mfbList.bobCancel">
+                    <i class="fas fa-times"></i>
+                    Der Zug fällt am {{v.vt}} im 
+                    <strong class="animate-show-hide ng-show" ng-show="v.highlight">Vorgang {{v.bobCancel.join(', ')}}</strong>
+                    <span class="animate-show-hide ng-show" ng-hide="v.highlight">Vorgang {{v.bobCancel.join(', ')}}</span>
+                    aus! Bitte Auswirkungen prüfen.
+                    <button type="button button-sm" ng-click="mfbList.addCancelNote($index);" class="btn btn-outline-dark">
+                      <i class="far fa-caret-square-up"></i> Bemerkung ergänzen
+                    </button>
+                    <button type="button button-sm" ng-click="mfbList.filterTrain(mfbList.routes[0].Zugnummer,v.vt);" class="btn btn-outline-dark">
+                      <i class="fas fa-search"></i> MFB am {{v.vt}}
+                    </button>
+                  </div>                  
+                </span>
+                <span class="animate-show-hide ng-show" ng-hide="mfbList.bobCancel.length > 0">
+                  <i class="fas fa-check"></i>
+                  Der Zug fällt in keinem anderen ebenfalls eingelesenen Vorgang aus.
+                </span>
+              </div>
+
+              <hr>
+
+              <div>
                 <span class="animate-show-hide ng-show" ng-show="mfbList.bobVorplan.length > 0">
                   <div ng-repeat="v in mfbList.bobVorplan">
                     <i class="fas fa-history"></i>
@@ -589,7 +613,7 @@
                   </div>                  
                 </span>
                 <span class="animate-show-hide ng-show" ng-hide="mfbList.bobVorplan.length > 0">
-                  <i class="fas fa-times"></i>
+                  <i class="fas fa-check"></i>
                   Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang eine Vorplanabfahrt.
                 </span>
               </div> 
@@ -613,7 +637,7 @@
                   </div>                  
                 </span>
                 <span class="animate-show-hide ng-show" ng-hide="mfbList.bobReroute.length > 0">
-                  <i class="fas fa-times"></i>
+                  <i class="fas fa-check"></i>
                   Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang eine weitere Umleitung.
                 </span>
               </div>
@@ -631,7 +655,7 @@
                   </div>                  
                 </span>
                 <span class="animate-show-hide ng-show" ng-hide="mfbList.bobDelay.length > 0">
-                  <i class="fas fa-times"></i>
+                  <i class="fas fa-check"></i>
                   Der Zug hat in keinem anderen ebenfalls eingelesenen Vorgang eine Verspätung.
                 </span>
               </div>

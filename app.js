@@ -36,12 +36,14 @@
         mfbList.inputZNr = '';
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
         mfbList.fromDate = new Date().toLocaleDateString('de-DE', options);
+        mfbList.ImportDate = mfbList.fromDate;
         mfbList.toDate = mfbList.fromDate;
         mfbList.showRules = false;
         mfbList.ArrangedRules = [];
         mfbList.bobVorplan = [];
         mfbList.bobDelay = [];
         mfbList.bobReroute = [];
+        mfbList.bobCancel = [];
         mfbList.mergedNote = '';
 
         mfbList.Options = { scrollableHeight: '300px', scrollable: true, enableSearch: true, 
@@ -133,7 +135,7 @@
             let r = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
             let note1 = r.map((t) => t.Vorgangsnummer);
             note1 = note1.filter((item, index) => note1.indexOf(item)===index).sort().join(', ');
-            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.fromDate + ') ';
+            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.ImportDate + ') ';
 
             newRoute.Bemerkung = note1 + newRoute.Bemerkung;
 
@@ -159,6 +161,7 @@
             mfbList.bobVorplan = [];
             mfbList.bobDelay = [];
             mfbList.bobReroute = [];
+            mfbList.bobCancel = [];
             mfbList.newRoute = '';
             mfbList.mergedNote = '';            
             mfbList.routes = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
@@ -181,7 +184,7 @@
 
             let note1 = mfbList.routes.map((r) => r.Vorgangsnummer);
             note1 = note1.filter((item, index) => note1.indexOf(item)===index).sort().join(', ');
-            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.fromDate + ') ';
+            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.ImportDate + ') ';
 
             mfbList.mergedNote = note1 + mfbList.routes.map((r) => r.Bemerkung).join(', ');
 
@@ -216,6 +219,16 @@
                         'highlight': bobReroute.some((e)=> new RegExp('^5').test(e))
                     });
                 }
+
+                let bobCancel = allRules.filter((r) => r.Regelungsart === "Ausfall").map((r) => r.Vorgangsnummer);
+                bobCancel = bobCancel.filter((e) => !mfbList.bobSequence.includes(e));
+                if(bobCancel.length > 0){
+                    mfbList.bobCancel.push({
+                        'vt': allDays[k],
+                        'bobCancel': bobCancel.filter((item, index) => bobCancel.indexOf(item)===index).sort(),
+                        'highlight': bobCancel.some((e)=> new RegExp('^5').test(e))
+                    });
+                }
                 
             }            
             //console.log(mfbList.stationArray);            
@@ -230,6 +243,11 @@
         mfbList.addRerouteNote = function(i){
             mfbList.mergedNote = mfbList.mergedNote + " Zusätzliche Umleitung beachten aus Maßnahme " + 
             mfbList.bobReroute[i].bobReroute.join(', ') + " am " + mfbList.bobReroute[i].vt;
+        };
+
+        mfbList.addCancelNote = function(i){
+            mfbList.mergedNote = mfbList.mergedNote + " Ausfall beachten aus Maßnahme " + 
+            mfbList.bobCancel[i].bobCancel.join(', ') + " am " + mfbList.bobCancel[i].vt;
         };
 
         mfbList.addDelayNote = function(i){
@@ -414,7 +432,7 @@
 
         mfbList.download = function() {
 
-            let filename = mfbList.fromDate + '-Aufteilung-' + mfbList.bobSequence.join('+') + '.csv';
+            let filename = mfbList.ImportDate + '-Aufteilung-' + mfbList.bobSequence.join('+') + '.csv';
             console.log(filename);
             let text = encodeURIComponent(createCsvText());
 
