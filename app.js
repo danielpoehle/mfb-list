@@ -36,12 +36,14 @@
         mfbList.inputZNr = '';
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
         mfbList.fromDate = new Date().toLocaleDateString('de-DE', options);
+        mfbList.ImportDate = mfbList.fromDate;
         mfbList.toDate = mfbList.fromDate;
         mfbList.showRules = false;
         mfbList.ArrangedRules = [];
         mfbList.bobVorplan = [];
         mfbList.bobDelay = [];
         mfbList.bobReroute = [];
+        mfbList.bobCancel = [];
         mfbList.mergedNote = '';
 
         mfbList.Options = { scrollableHeight: '300px', scrollable: true, enableSearch: true, 
@@ -133,7 +135,7 @@
             let r = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
             let note1 = r.map((t) => t.Vorgangsnummer);
             note1 = note1.filter((item, index) => note1.indexOf(item)===index).sort().join(', ');
-            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.fromDate + ') ';
+            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.ImportDate + ') ';
 
             newRoute.Bemerkung = note1 + newRoute.Bemerkung;
 
@@ -159,6 +161,7 @@
             mfbList.bobVorplan = [];
             mfbList.bobDelay = [];
             mfbList.bobReroute = [];
+            mfbList.bobCancel = [];
             mfbList.newRoute = '';
             mfbList.mergedNote = '';            
             mfbList.routes = mfbList.assignList[bobIndex].trains[trainIndex].vt[vtIndex].trains.filter((t) => t.Regelungsart === 'Umleitung');
@@ -181,7 +184,7 @@
 
             let note1 = mfbList.routes.map((r) => r.Vorgangsnummer);
             note1 = note1.filter((item, index) => note1.indexOf(item)===index).sort().join(', ');
-            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.fromDate + ') ';
+            note1 = 'Fplo aus den Vorgängen ' + note1 + ' (Zusammenfassung Datenstand ' + mfbList.ImportDate + ') ';
 
             mfbList.mergedNote = note1 + mfbList.routes.map((r) => r.Bemerkung).join(', ');
 
@@ -216,6 +219,16 @@
                         'highlight': bobReroute.some((e)=> new RegExp('^5').test(e))
                     });
                 }
+
+                let bobCancel = allRules.filter((r) => r.Regelungsart === "Ausfall").map((r) => r.Vorgangsnummer);
+                bobCancel = bobCancel.filter((e) => !mfbList.bobSequence.includes(e));
+                if(bobCancel.length > 0){
+                    mfbList.bobCancel.push({
+                        'vt': allDays[k],
+                        'bobCancel': bobCancel.filter((item, index) => bobCancel.indexOf(item)===index).sort(),
+                        'highlight': bobCancel.some((e)=> new RegExp('^5').test(e))
+                    });
+                }
                 
             }            
             //console.log(mfbList.stationArray);            
@@ -232,6 +245,11 @@
             mfbList.bobReroute[i].bobReroute.join(', ') + " am " + mfbList.bobReroute[i].vt;
         };
 
+        mfbList.addCancelNote = function(i){
+            mfbList.mergedNote = mfbList.mergedNote + " Ausfall beachten aus Maßnahme " + 
+            mfbList.bobCancel[i].bobCancel.join(', ') + " am " + mfbList.bobCancel[i].vt;
+        };
+
         mfbList.addDelayNote = function(i){
             mfbList.mergedNote = mfbList.mergedNote + " Verspätung berücksichtigen aus Maßnahme " + 
             mfbList.bobDelay[i].bobDelay.join(', ') + " am " + mfbList.bobDelay[i].vt;
@@ -244,41 +262,63 @@
                 console.log(completeList.length);
                 if(completeList.length > 0){
                     for (let ind = 0; ind < mfbList.bobSequence.length; ind += 1) {
-                        //console.log(ind + " " + mfbList.bobSequence.slice(0,ind));
-                        let tNr = completeList.filter((t) => t.Vorgangsnummer === mfbList.bobSequence[ind]).map((t) => t.Zugnummer);
-                        tNr = tNr.filter((item, index) => tNr.indexOf(item)===index);
-                        let doubleNr = completeList.filter((t) => mfbList.bobSequence.slice(0,ind).includes(t.Vorgangsnummer) && tNr.includes(t.Zugnummer)).map((t) => t.Zugnummer);
-                        doubleNr = doubleNr.filter((item, index) => doubleNr.indexOf(item)===index);
-                        tNr = tNr.filter((t) => doubleNr.indexOf(t) === -1).sort((a,b) =>  a - b);
-                        let trainList = [];
-                        
-
-                        for (let i = 0; i < tNr.length; i+= 1) {                
-                            let vt = completeList.filter((t) => t.Zugnummer === tNr[i]).map((z) => z.Verkehrstag.VNumber);
-                            vt = vt.filter((item, index) => vt.indexOf(item)===index).sort();
-                            let d = [];
-                            for (let j = 0; j < vt.length; j+= 1) {                    
-                                d.push({ 
-                                    'day': completeList.find((z) => z.Verkehrstag.VNumber === vt[j]).Verkehrstag,
-                                    'trains': completeList.filter((z) => z.Zugnummer === tNr[i] && z.Verkehrstag.VNumber === vt[j]).sort((a,b) => (a.Regelungsart > b.Regelungsart) ? 1 : -1),
-                                    'ignore': false
-                                });
-                            }
-                            trainList.push({
-                                'znr': tNr[i],
-                                'zg': d[0].trains[0].Zuggattung,
-                                'kd': d[0].trains[0].Kundennummer,
-                                'von': d[0].trains[0].Abgangsbahnhof,
-                                'bis': d[0].trains[0].Zielbahnhof,
-                                'vt': d
-                            });                                               
-                        }
-
+                        //init all lists with no trains
                         mfbList.assignList.push({
                             'bobnr': mfbList.bobSequence[ind],
-                            'trains': trainList
+                            'trains': []
                         });
                     }
+
+                    let days = completeList.map((t) => t.Verkehrstag.VNumber);
+                    days = days.filter((item, index) => days.indexOf(item)===index).sort();
+
+                    for (let j = 0; j < days.length; j+=1) {
+                        const dList = completeList.filter((t) => t.Verkehrstag.VNumber === days[j]);
+                        let znrDay = dList.map((t) => t.Zugnummer);
+                        //find all unique znr for this day
+                        znrDay = znrDay.filter((item, index) => znrDay.indexOf(item)===index).sort();
+
+                        for (let k = 0; k < znrDay.length; k+=1) {
+                            let znrVt = dList.filter((t) => t.Zugnummer === znrDay[k]);
+                            let bobs = znrVt.map((t) => t.Vorgangsnummer);
+                            bobs = bobs.filter((item, index) => bobs.indexOf(item)===index)
+                            //find first occurence of bobSequence in bobs
+                            for (let ind = 0; ind < mfbList.bobSequence.length; ind+=1) {
+                                if(bobs.includes(mfbList.bobSequence[ind])){
+                                    //add all rules of znrVT to this list
+                                    let list = mfbList.assignList.find((l) => l.bobnr === mfbList.bobSequence[ind]);
+                                    if(list.trains.findIndex((t) => t.znr === znrDay[k]) === -1){
+                                        //create train element and add rules for this vt to it
+                                        let rules = [];
+                                        rules.push({ 
+                                            'day': znrVt[0].Verkehrstag,
+                                            'trains': znrVt.sort((a,b) => (a.Regelungsart > b.Regelungsart) ? 1 : -1),
+                                            'ignore': false
+                                        });
+                                        list.trains.push({
+                                            'znr': znrVt[0].Zugnummer,
+                                            'zg': znrVt[0].Zuggattung,
+                                            'kd': znrVt[0].Kundennummer,
+                                            'von': znrVt[0].Abgangsbahnhof,
+                                            'bis': znrVt[0].Zielbahnhof,
+                                            'vt': rules});
+                                            break;
+                                    }else{
+                                        list.trains.find((t) => t.znr === znrDay[k]).vt.push({ 
+                                            'day': znrVt[0].Verkehrstag,
+                                            'trains': znrVt.sort((a,b) => (a.Regelungsart > b.Regelungsart) ? 1 : -1),
+                                            'ignore': false
+                                        });
+                                        break;
+                                    }
+                                } 
+                            }
+                        }
+                    }                    
+                }
+
+                for (let ind = 0; ind < mfbList.bobSequence.length; ind += 1) {
+                    mfbList.assignList[ind].trains = mfbList.assignList[ind].trains.sort((a, b) => a.znr - b.znr);
                 }
                 
                 if(mfbList.assignList.length >0){
@@ -414,7 +454,7 @@
 
         mfbList.download = function() {
 
-            let filename = mfbList.fromDate + '-Aufteilung-' + mfbList.bobSequence.join('+') + '.csv';
+            let filename = mfbList.ImportDate + '-Aufteilung-' + mfbList.bobSequence.join('+') + '.csv';
             console.log(filename);
             let text = encodeURIComponent(createCsvText());
 
