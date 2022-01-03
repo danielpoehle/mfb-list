@@ -329,6 +329,11 @@
                         <td class="table-secondary animate-show-hide ng-show" ng-show="a.rules.length===0">{{a.date}}</td>
                         <td>
                           <div class="animate-show-hide ng-show text-center text-secondary" ng-show="a.rules.length===0">-- keine Betroffenheit durch Bau --</div>
+                          <div class="animate-show-hide ng-show" ng-hide="a.rules.length===0">
+                            <h6>Betroffenheit für <strong>{{a.rules[0].Zuggattung}} {{a.rules[0].Zugnummer}}</strong>  
+                              ({{a.rules[0].Abgangsbahnhof}} - {{a.rules[0].Zielbahnhof}})
+                            </h6>
+                          </div>
                           <table class="table table-sm table-hover animate-show-hide ng-show" ng-hide="a.rules.length===0">
                             <thead class="table-primary">
                               <tr>
